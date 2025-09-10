@@ -88,6 +88,7 @@ Individual* tournamentSelect() {
 
 
 void crossover(Individual* p1, Individual* p2, Individual* child) {
+    //A mix of parents that creates a child
     int start = rand() % (N - 1);
     int end = rand() % (N - 1);
     if (start > end) { int tmp = start; start = end; end = tmp; }
