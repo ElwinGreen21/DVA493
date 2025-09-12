@@ -9,7 +9,8 @@ from tensorflow.keras.callbacks import EarlyStopping
 import os
 
 # === 1. Ladda data ===
-data = np.loadtxt("maintenance.txt")
+file_path = os.path.join(os.path.dirname(__file__), "maintenance.txt")
+data = np.loadtxt(file_path)
 X = data[:, :16]    # 16 features
 y = data[:, 16:]    # 2 outputs
 
