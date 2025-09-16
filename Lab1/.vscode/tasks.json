@@ -1,0 +1,14 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Build and Run C Program",
+			"type": "shell",
+			"command": "gcc main.c -o main.exe && ./main.exe",
+			"problemMatcher": [
+				"$gcc"
+			],
+			"group": "build"
+		}
+	]
+}

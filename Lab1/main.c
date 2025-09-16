@@ -1,0 +1,59 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+#define NUM_FEATURES 16
+#define NUM_OUTPUTS 2
+
+
+int main(void) {
+
+    FILE *file = fopen("maintenance.txt", "r");
+    if (!file) {
+        printf("Could not open maintenance.txt\n");
+        return 1;
+    }
+
+    // Count lines
+    int num_rows = 0;
+    char ch;
+    while (!feof(file)) {
+        ch = fgetc(file);
+        if (ch == '\n') num_rows++;
+    }
+    rewind(file);
+
+    // Allocate memory
+    double **X = malloc(num_rows * sizeof(double*));
+    double **y = malloc(num_rows * sizeof(double*));
+    for (int i = 0; i < num_rows; i++) {
+        X[i] = malloc(NUM_FEATURES * sizeof(double));
+        y[i] = malloc(NUM_OUTPUTS * sizeof(double));
+    }
+
+    // Read data
+    int row = 0;
+    while (row < num_rows) {
+        int read = fscanf(
+            file,
+            "%lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf",
+            &X[row][0], &X[row][1], &X[row][2], &X[row][3], &X[row][4], &X[row][5], &X[row][6], &X[row][7],
+            &X[row][8], &X[row][9], &X[row][10], &X[row][11], &X[row][12], &X[row][13], &X[row][14], &X[row][15],
+            &y[row][0], &y[row][1]
+        );
+        if (read != NUM_FEATURES + NUM_OUTPUTS) break;
+        row++;
+    }
+
+    printf("Read %d rows\n", row);
+
+    // Free memory
+    for (int i = 0; i < num_rows; i++) {
+        free(X[i]);
+        free(y[i]);
+    }
+    free(X);
+    free(y);
+
+    fclose(file);
+    return 0;
+}
