@@ -34,13 +34,13 @@ model = Sequential([
 model.compile(optimizer=Adam(learning_rate=0.001), loss="mse")
 
 # === 5. Träna modellen ===
-es = EarlyStopping(monitor="val_loss", patience=10, restore_best_weights=True)
+es = EarlyStopping(monitor="val_loss", patience=100, restore_best_weights=True)
 
 history = model.fit(
     X_train, y_train,
     validation_data=(X_val, y_val),
-    epochs=500,
-    batch_size=32,
+    epochs=1000,
+    batch_size=64,
     callbacks=[es],
     verbose=1
 )
