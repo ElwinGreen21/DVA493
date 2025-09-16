@@ -4,6 +4,27 @@
 #define NUM_FEATURES 16
 #define NUM_OUTPUTS 2
 
+//Vi behöver minnst 3 funktioner, en för att läsa in data, en för att träna modellen och en för att göra prediktioner.
+
+// ReLU aktiveringsfunktion
+double relu(double x) {
+    return (x > 0) ? x : 0.0;
+}
+
+// Derivata av ReLU
+double relu_derivative(double x) {
+    return (x > 0) ? 1.0 : 0.0;
+}
+
+int forward_propagation() {
+    // Placeholder för framåtpropageringslogik
+    return 0;
+}
+
+int back_propagation() {
+    // Placeholder för bakåtpropageringslogik
+    return 0;
+}
 
 int main(void) {
 
