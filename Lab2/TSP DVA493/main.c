@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <time.h>
+#include <string.h>
 
 #define N 52              
 #define POP_SIZE 500
@@ -141,7 +142,7 @@ void local2opt(Individual* ind) {
                 double newDist = distMatrix[a][c] + distMatrix[b][d];
 
                 if (newDist < oldDist) {
-                    // vänd segment [i..j]
+                    // vï¿½nd segment [i..j]
                     int left = i, right = j;
                     while (left < right) {
                         int tmp = ind->route[left];
@@ -217,7 +218,7 @@ int main() {
     srand(time(NULL));
 
     FILE* fp = fopen("berlin52.tsp", "r");
-    if (!fp) { printf("Kunde inte öppna berlin52.tsp\n"); return 1; }
+    if (!fp) { printf("Kunde inte ï¿½ppna berlin52.tsp\n"); return 1; }
 
     char line[256];
     while (fgets(line, sizeof(line), fp)) {
@@ -237,7 +238,7 @@ int main() {
     initPopulation();
     evolve();
 
-    printf("\nBästa rutt hittad (distans %.2f):\n", bestEver.dist);
+    printf("\nBest route found (distance %.2f):\n", bestEver.dist);
     printf("1 ");
     for (int i = 0; i < N - 1; i++) printf("%d ", bestEver.route[i]);
     printf("1\n");
