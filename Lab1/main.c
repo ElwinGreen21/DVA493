@@ -16,9 +16,18 @@ double relu_derivative(double x) {
     return (x > 0) ? 1.0 : 0.0;
 }
 
-int forward_propagation() {
+double forward_propagation(double* x, double* y, double weights[2][16]) {
     // Placeholder för framåtpropageringslogik
-    return 0;
+    double outputs[2] = {0.0, 0.0};
+    for (int i = 0; i < 2; i++) {
+        double sum = y[i];
+        for (int j = 0; j < 16; j++) {
+            sum += x[j] * weights[i][j];
+        }
+        outputs[i] = relu(sum);  // <-- här används ReLU
+    }
+
+    return outputs[0]; // Returnerar första output för enkelhetens skull
 }
 
 int back_propagation() {
@@ -28,6 +37,14 @@ int back_propagation() {
 
 int main(void) {
 
+    double weights[2][16] = {
+        {0.2, -0.1, 0.4, 0.3, -0.5, 0.1, 0.2, 0.7,
+         0.3, -0.2, 0.1, 0.5, -0.4, 0.6, 0.2, -0.3},
+        {-0.3, 0.6, 0.2, -0.1, 0.4, 0.5, -0.2, 0.1,
+         0.7, 0.3, -0.6, 0.2, 0.1, -0.5, 0.4, 0.3}
+    };
+
+    // Open file
     FILE *file = fopen("maintenance.txt", "r");
     if (!file) {
         printf("Could not open maintenance.txt\n");
@@ -76,5 +93,10 @@ int main(void) {
     free(y);
 
     fclose(file);
+
+    double outputs[] = forward_propagation(X*, y*, weights**);
+    
+    printf("Output 1: %f\n", outputs[0]);
+    printf("Output 2: %f\n", outputs[1]);
     return 0;
 }
