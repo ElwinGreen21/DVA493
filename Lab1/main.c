@@ -33,18 +33,26 @@ double relu_derivative(double x) {
     return (x > 0) ? 1.0 : 0.0;
 }
 
-void forward_propagation(double *X, double weights[2][16], double *bias, double* outputs) {
-    // Placeholder för framåtpropageringslogik
-
-    for (int i = 0; i < NUM_OUTPUTS; i++) {
-        double sum = bias[i];
+void forward_propagation(double *x, double Weight_input_hidden[NUM_HIDDEN][NUM_FEATURES], double *bias_hidden, double Weight_hidden_output[NUM_OUTPUTS][NUM_HIDDEN], double *bias_outputs, double *hidden, double *outputs) {
+    // Steg 1: Input → Hidden
+    for (int i = 0; i < NUM_HIDDEN; i++) {
+        double sum = bias_hidden[i];
         for (int j = 0; j < NUM_FEATURES; j++) {
-            sum += X[j] * weights[i][j];
+            sum += x[j] * Weight_input_hidden[i][j];
         }
-        outputs[i] = relu(sum);  // <-- här används ReLU
+        hidden[i] = relu(sum);
     }
-  
+
+    // Steg 2: Hidden → Output
+    for (int i = 0; i < NUM_OUTPUTS; i++) {
+        double sum = bias_outputs[i];
+        for (int j = 0; j < NUM_HIDDEN; j++) {
+            sum += hidden[j] *  Weight_hidden_output[i][j];
+        }
+        outputs[i] = relu(sum);
+    }
 }
+
 
 int back_propagation() {
     // Placeholder för bakåtpropageringslogik
@@ -154,7 +162,7 @@ int main(void) {
     //Forward propagation for all training data
     for(int i = 0; i < datasets.train.size; i++) {
 
-        forward_propagation(datasets.train.X[i], weights, bias, outputs);
+        forward_propagation(datasets.train.X[i], Weight_input_hidden, bias_hidden, Weight_hidden_output, bias_outputs, hidden, outputs);
     }
     //En epoch = alla träningsrader en gång (forward + backward + update).
     
