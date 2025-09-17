@@ -26,7 +26,23 @@ int back_propagation() {
     return 0;
 }
 
+int shuffle_data(int num_rows, double **X, double **y) {
+    for (int i = num_rows -1; i > 0; i--){
+        int j = rand() % (i + 1);
+
+        double* tempX = X[i];
+        X[i] = X[j];
+        X[j] = tempX;
+
+        double* tempY = y[i];
+        y[i] = y[j];
+        y[j] = tempY;
+    } 
+    return 0;
+}
+
 int main(void) {
+    srand(time(NULL));
 
     FILE *file = fopen("maintenance.txt", "r");
     if (!file) {
@@ -67,7 +83,7 @@ int main(void) {
 
     printf("Read %d rows\n", row);
 
-    // Free memory
+    // Free memory!!!!!!!!!!!!! ska nog köras sist i main
     for (int i = 0; i < num_rows; i++) {
         free(X[i]);
         free(y[i]);
