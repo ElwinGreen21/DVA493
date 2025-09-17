@@ -23,7 +23,7 @@ double relu_derivative(double x) {
     return (x > 0) ? 1.0 : 0.0;
 }
 
-double forward_propagation(double* x, double* y, double weights[2][16]) {
+void forward_propagation(double* x, double* y, double weights[2][16], double* outputs) {
     // Placeholder för framåtpropageringslogik
     double outputs[2] = {0.0, 0.0};
     for (int i = 0; i < 2; i++) {
@@ -34,7 +34,7 @@ double forward_propagation(double* x, double* y, double weights[2][16]) {
         outputs[i] = relu(sum);  // <-- här används ReLU
     }
 
-    return outputs[0]; // Returnerar första output för enkelhetens skull
+    
 }
 
 int back_propagation() {
@@ -112,8 +112,8 @@ int main(void) {
     }
 
     printf("Read %d rows\n", row);
-
-    double outputs[] = forward_propagation(X*, y*, weights**);
+    double outputs[] = {0.0, 0.0};
+    forward_propagation(X, y, weights, outputs);
     
     printf("Output 1: %f\n", outputs[0]);
     printf("Output 2: %f\n", outputs[1]);
