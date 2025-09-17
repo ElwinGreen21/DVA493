@@ -58,7 +58,7 @@ int shuffle_data(int num_rows, double **X, double **y) {
     } 
 
     train_index = num_rows * 0.5;
-    val_index = num_rows * 0.25 + val_index;
+    val_index = num_rows * 0.25 + train_index;
     test_index = num_rows - train_index - val_index;
     return 0;
 }
@@ -113,6 +113,13 @@ int main(void) {
 
     printf("Read %d rows\n", row);
 
+    double outputs[] = forward_propagation(X*, y*, weights**);
+    
+    printf("Output 1: %f\n", outputs[0]);
+    printf("Output 2: %f\n", outputs[1]);
+
+
+    
     // Free memory!!!!!!!!!!!!! ska nog köras sist i main
     for (int i = 0; i < num_rows; i++) {
         free(X[i]);
@@ -122,10 +129,5 @@ int main(void) {
     free(y);
 
     fclose(file);
-
-    double outputs[] = forward_propagation(X*, y*, weights**);
-    
-    printf("Output 1: %f\n", outputs[0]);
-    printf("Output 2: %f\n", outputs[1]);
     return 0;
 }
