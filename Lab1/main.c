@@ -1,8 +1,15 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
+#include <math.h>
 
 #define NUM_FEATURES 16
 #define NUM_OUTPUTS 2
+
+int val_index;
+int train_index;
+int test_index;
+
 
 //Vi behöver minnst 3 funktioner, en för att läsa in data, en för att träna modellen och en för att göra prediktioner.
 
@@ -49,6 +56,10 @@ int shuffle_data(int num_rows, double **X, double **y) {
         y[i] = y[j];
         y[j] = tempY;
     } 
+
+    train_index = num_rows * 0.5;
+    val_index = num_rows * 0.25 + val_index;
+    test_index = num_rows - train_index - val_index;
     return 0;
 }
 
