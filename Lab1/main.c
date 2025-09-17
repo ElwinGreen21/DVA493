@@ -5,6 +5,7 @@
 
 #define NUM_FEATURES 16
 #define NUM_OUTPUTS 2
+#define NUM_HIDDEN 16   // du kan experimentera med storlek
 
 
 typedef struct {
@@ -81,13 +82,6 @@ Split shuffle_data(int num_rows, double **X, double **y) {
 int main(void) {
     srand(time(NULL));
 
-    double weights[2][16] = {
-        {0.2, -0.1, 0.4, 0.3, -0.5, 0.1, 0.2, 0.7,
-         0.3, -0.2, 0.1, 0.5, -0.4, 0.6, 0.2, -0.3},
-        {-0.3, 0.6, 0.2, -0.1, 0.4, 0.5, -0.2, 0.1,
-         0.7, 0.3, -0.6, 0.2, 0.1, -0.5, 0.4, 0.3}
-    };
-
     // Open file
     FILE *file = fopen("maintenance.txt", "r");
     if (!file) {
@@ -130,8 +124,33 @@ int main(void) {
 
     Split datasets = shuffle_data(num_rows, X, y);
 
-    double bias[NUM_OUTPUTS] = {0.1, -0.2};
+    // Initialize neural network parameters
+    double hidden[NUM_HIDDEN];
     double outputs[NUM_OUTPUTS] = {0.0, 0.0};
+
+    double Weight_input_hidden[NUM_HIDDEN][NUM_FEATURES];  // från input (16) till hidden (8)
+    double bias_hidden[NUM_HIDDEN];   // bias för hidden layer
+
+    double Weight_hidden_output[NUM_OUTPUTS][NUM_HIDDEN];   // från hidden (8) till output (2)
+    double bias_outputs[NUM_OUTPUTS];  // bias för output
+
+    // Initiera vikter slumpmässigt (exempel: -0.5 till 0.5)
+    for (int i = 0; i < NUM_HIDDEN; i++) {
+        bias_hidden[i] = ((double) rand() / RAND_MAX) - 0.5;
+
+        for (int j = 0; j < NUM_FEATURES; j++) {
+            Weight_input_hidden[i][j] = ((double) rand() / RAND_MAX) - 0.5;
+        }
+    }
+
+    for (int i = 0; i < NUM_OUTPUTS; i++) {
+        bias_outputs[i] = ((double) rand() / RAND_MAX) - 0.5;
+        
+        for (int j = 0; j < NUM_HIDDEN; j++) {
+            Weight_hidden_output[i][j] = ((double) rand() / RAND_MAX) - 0.5;
+        }
+    }
+
     //Forward propagation for all training data
     for(int i = 0; i < datasets.train.size; i++) {
 
