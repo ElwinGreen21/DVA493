@@ -26,6 +26,8 @@ int back_propagation() {
     return 0;
 }
 
+// randomisera data för att undvika bias och dela sedan upp i träning,test,validering
+// Fisher-Yates shuffle algorithm
 int shuffle_data(int num_rows, double **X, double **y) {
     for (int i = num_rows -1; i > 0; i--){
         int j = rand() % (i + 1);
