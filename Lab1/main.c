@@ -23,18 +23,17 @@ double relu_derivative(double x) {
     return (x > 0) ? 1.0 : 0.0;
 }
 
-void forward_propagation(double* x, double* y, double weights[2][16], double* outputs) {
+void forward_propagation(double **X, double **Y, double weights[2][16], double* outputs) {
     // Placeholder för framåtpropageringslogik
-    double outputs[2] = {0.0, 0.0};
+    
     for (int i = 0; i < 2; i++) {
-        double sum = y[i];
+        double sum = Y[i];
         for (int j = 0; j < 16; j++) {
-            sum += x[j] * weights[i][j];
+            sum += X[j] * weights[i][j];
         }
         outputs[i] = relu(sum);  // <-- här används ReLU
     }
-
-    
+  
 }
 
 int back_propagation() {
