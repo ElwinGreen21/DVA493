@@ -127,10 +127,13 @@ int main(void) {
     }
 
     printf("Read %d rows\n", row);
+
+    Split datasets = shuffle_data(num_rows, X, y);
+
     double bias[NUM_OUTPUTS] = {0.1, -0.2};
     double outputs[NUM_OUTPUTS] = {0.0, 0.0};
 
-    forward_propagation(X[0], weights, bias, outputs);
+    forward_propagation(datasets.train.X[0], weights, bias, outputs);
     
     printf("Output 1: %f\n", outputs[0]);
     printf("Output 2: %f\n", outputs[1]);
