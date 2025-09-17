@@ -6,9 +6,18 @@
 #define NUM_FEATURES 16
 #define NUM_OUTPUTS 2
 
-int val_index;
-int train_index;
-int test_index;
+
+typedef struct {
+    double **X;   // features
+    double **y;   // labels
+    int size;     // antal rader
+} Dataset;
+
+typedef struct {
+    Dataset train;
+    Dataset val;
+    Dataset test;
+} Split;
 
 
 //Vi behöver minnst 3 funktioner, en för att läsa in data, en för att träna modellen och en för att göra prediktioner.
@@ -43,7 +52,7 @@ int back_propagation() {
 
 // randomisera data för att undvika bias och dela sedan upp i träning,test,validering
 // Fisher-Yates shuffle algorithm
-int shuffle_data(int num_rows, double **X, double **y) {
+Split shuffle_data(int num_rows, double **X, double **y) {
     for (int i = num_rows -1; i > 0; i--){
         int j = rand() % (i + 1);
 
@@ -56,10 +65,17 @@ int shuffle_data(int num_rows, double **X, double **y) {
         y[j] = tempY;
     } 
 
-    train_index = num_rows * 0.5;
-    val_index = num_rows * 0.25 + train_index;
-    test_index = num_rows - train_index - val_index;
-    return 0;
+    int train_size = num_rows * 0.5;
+    int val_size = num_rows * 0.25;
+    int test_size = num_rows - train_size - val_size;
+
+    Split split = {
+        { X, y, train_size },
+        { X + train_size, y + train_size, val_size },
+        { X + train_size + val_size, y + train_size + val_size, test_size }
+    };
+
+    return split;
 }
 
 int main(void) {
@@ -118,7 +134,7 @@ int main(void) {
     printf("Output 2: %f\n", outputs[1]);
 
 
-    
+
     // Free memory!!!!!!!!!!!!! ska nog köras sist i main
     for (int i = 0; i < num_rows; i++) {
         free(X[i]);
