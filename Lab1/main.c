@@ -132,8 +132,12 @@ int main(void) {
 
     double bias[NUM_OUTPUTS] = {0.1, -0.2};
     double outputs[NUM_OUTPUTS] = {0.0, 0.0};
+    //Forward propagation for all training data
+    for(int i = 0; i < datasets.train.size; i++) {
 
-    forward_propagation(datasets.train.X[0], weights, bias, outputs);
+        forward_propagation(datasets.train.X[i], weights, bias, outputs);
+    }
+    //En epoch = alla träningsrader en gång (forward + backward + update).
     
     printf("Output 1: %f\n", outputs[0]);
     printf("Output 2: %f\n", outputs[1]);
