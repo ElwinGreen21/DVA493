@@ -218,13 +218,7 @@ int main(void) {
     // --- loopa över alla rader i träningsdatan ---
     for (int i = 0; i < datasets.train.size; i++) {
         // ---- Forward ----
-        forward_propagation(
-            datasets.train.X[i],
-            Weight_input_hidden, bias_hidden,
-            Weight_hidden_output, bias_outputs,
-            hidden, outputs,
-            z_hidden, z_output
-        );
+        forward_propagation(datasets.train.X[i], Weight_input_hidden, bias_hidden, Weight_hidden_output, bias_outputs, hidden, outputs, z_hidden, z_output);
 
         // ---- Loss ----
         double loss = mean_squared_error(datasets.train.y[i], outputs, NUM_OUTPUTS);
