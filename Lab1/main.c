@@ -6,7 +6,7 @@
 #define NUM_FEATURES 16
 #define NUM_OUTPUTS 2
 #define NUM_HIDDEN 16   // du kan experimentera med storlek
-
+#define learning_rate 0.001 // justera inlärningshastigheten
 
 typedef struct {
     double **X;   // features
@@ -65,7 +65,7 @@ double mean_squared_error(double *y_true, double *y_pred, int size) {
 }
 
 
-void back_propagation(double *x, double *y_true, double Weight_input_hidden[NUM_HIDDEN][NUM_FEATURES], double *bias_hidden, double Weight_hidden_output[NUM_OUTPUTS][NUM_HIDDEN], double *bias_outputs, double *hidden, double *outputs, double *z_hidden, double *z_output, double learning_rate) {
+void back_propagation(double *x, double *y_true, double Weight_input_hidden[NUM_HIDDEN][NUM_FEATURES], double *bias_hidden, double Weight_hidden_output[NUM_OUTPUTS][NUM_HIDDEN], double *bias_outputs, double *hidden, double *outputs, double *z_hidden, double *z_output) {
     double delta_output[NUM_OUTPUTS];
     double delta_hidden[NUM_HIDDEN];
 
