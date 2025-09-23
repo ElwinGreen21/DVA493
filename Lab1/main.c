@@ -25,50 +25,52 @@ typedef struct {
 double output_min[NUM_OUTPUTS];
 double output_max[NUM_OUTPUTS];
 
-// Initiera min/max
-for (int j = 0; j < NUM_OUTPUTS; j++) {
-    output_min[j] = y[0][j];
-    output_max[j] = y[0][j];
-}
+void normalize_data(double **X, double **y, int num_rows) {
 
-// Hitta min/max
-for (int i = 0; i < num_rows; i++) {
+    // Initiera min/max
     for (int j = 0; j < NUM_OUTPUTS; j++) {
-        if (y[i][j] < output_min[j]) output_min[j] = y[i][j];
-        if (y[i][j] > output_max[j]) output_max[j] = y[i][j];
+        output_min[j] = y[0][j];
+        output_max[j] = y[0][j];
     }
-}
 
-// Skala till [0,1]
-for (int i = 0; i < num_rows; i++) {
-    for (int j = 0; j < NUM_OUTPUTS; j++) {
-        y[i][j] = (y[i][j] - output_min[j]) / (output_max[j] - output_min[j]);
+    // Hitta min/max
+    for (int i = 0; i < num_rows; i++) {
+        for (int j = 0; j < NUM_OUTPUTS; j++) {
+            if (y[i][j] < output_min[j]) output_min[j] = y[i][j];
+            if (y[i][j] > output_max[j]) output_max[j] = y[i][j];
+        }
     }
-}
-double feature_min[NUM_FEATURES];
-double feature_max[NUM_FEATURES];
 
-// 1. Initiera min/max
-for (int j = 0; j < NUM_FEATURES; j++) {
-    feature_min[j] = X[0][j];
-    feature_max[j] = X[0][j];
-}
+    // Skala till [0,1]
+    for (int i = 0; i < num_rows; i++) {
+        for (int j = 0; j < NUM_OUTPUTS; j++) {
+            y[i][j] = (y[i][j] - output_min[j]) / (output_max[j] - output_min[j]);
+        }
+    }
+    double feature_min[NUM_FEATURES];
+    double feature_max[NUM_FEATURES];
 
-// 2. Hitta min och max över hela datasetet
-for (int i = 0; i < num_rows; i++) {
+    // 1. Initiera min/max
     for (int j = 0; j < NUM_FEATURES; j++) {
-        if (X[i][j] < feature_min[j]) feature_min[j] = X[i][j];
-        if (X[i][j] > feature_max[j]) feature_max[j] = X[i][j];
+        feature_min[j] = X[0][j];
+        feature_max[j] = X[0][j];
+    }
+
+    // 2. Hitta min och max över hela datasetet
+    for (int i = 0; i < num_rows; i++) {
+        for (int j = 0; j < NUM_FEATURES; j++) {
+            if (X[i][j] < feature_min[j]) feature_min[j] = X[i][j];
+            if (X[i][j] > feature_max[j]) feature_max[j] = X[i][j];
+        }
+    }
+
+    // 3. Skala varje feature till [0,1]
+    for (int i = 0; i < num_rows; i++) {
+        for (int j = 0; j < NUM_FEATURES; j++) {
+            X[i][j] = (X[i][j] - feature_min[j]) / (feature_max[j] - feature_min[j]);
+        }
     }
 }
-
-// 3. Skala varje feature till [0,1]
-for (int i = 0; i < num_rows; i++) {
-    for (int j = 0; j < NUM_FEATURES; j++) {
-        X[i][j] = (X[i][j] - feature_min[j]) / (feature_max[j] - feature_min[j]);
-    }
-}
-
 // ReLU aktiveringsfunktion
 double relu(double x) {
     return (x > 0) ? x : 0.0;
