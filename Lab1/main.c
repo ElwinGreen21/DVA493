@@ -213,29 +213,29 @@ int main(void) {
     double z_output[NUM_OUTPUTS];
 
     for (int epoch = 0; epoch < epochs; epoch++) {
-    double total_loss = 0.0;
+        double total_loss = 0.0;
 
-    // --- loopa över alla rader i träningsdatan ---
-    for (int i = 0; i < datasets.train.size; i++) {
-        // ---- Forward ----
-        forward_propagation(
-            datasets.train.X[i],
-            Weight_input_hidden, bias_hidden,
-            Weight_hidden_output, bias_outputs,
-            hidden, outputs,
-            z_hidden, z_output
-        );
+        // --- loopa över alla rader i träningsdatan ---
+        for (int i = 0; i < datasets.train.size; i++) {
+            // ---- Forward ----
+            forward_propagation(
+                datasets.train.X[i],
+                Weight_input_hidden, bias_hidden,
+                Weight_hidden_output, bias_outputs,
+                hidden, outputs,
+                z_hidden, z_output
+            );
 
-        // ---- Loss ----
-        double loss = mean_squared_error(datasets.train.y[i], outputs, NUM_OUTPUTS);
-        total_loss += loss;
+            // ---- Loss ----
+            double loss = mean_squared_error(datasets.train.y[i], outputs, NUM_OUTPUTS);
+            total_loss += loss;
 
-        // ---- Backward ----
-        back_propagation(datasets.train.X[i], datasets.train.y[i], Weight_input_hidden, bias_hidden, Weight_hidden_output, bias_outputs,hidden, outputs,z_hidden, z_output);
-    }
+            // ---- Backward ----
+            back_propagation(datasets.train.X[i], datasets.train.y[i], Weight_input_hidden, bias_hidden, Weight_hidden_output, bias_outputs,hidden, outputs,z_hidden, z_output);
+        }
 
-    // skriv ut snitt-loss för den här epoken
-    printf("Epoch %d, Loss: %f\n", epoch + 1, total_loss / datasets.train.size);
+        // skriv ut snitt-loss för den här epoken
+        printf("Epoch %d, Loss: %f\n", epoch + 1, total_loss / datasets.train.size);
     }
 
 
