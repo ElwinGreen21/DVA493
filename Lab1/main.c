@@ -6,7 +6,7 @@
 #define NUM_FEATURES 16
 #define NUM_OUTPUTS 2
 #define NUM_HIDDEN 16   // du kan experimentera med storlek
-#define learning_rate 0.001 // justera inlärningshastigheten
+#define learning_rate 0.001
 
 typedef struct {
     double **X;   // features
@@ -23,7 +23,7 @@ typedef struct {
 
 //Vi behöver minnst 3 funktioner, en för att läsa in data, en för att träna modellen och en för att göra prediktioner.
 
-// ReLU aktiveringsfunktion. Intervall som i fallet med sigmoid är [0, ∞)
+// ReLU aktiveringsfunktion
 double relu(double x) {
     return (x > 0) ? x : 0.0;
 }
@@ -33,14 +33,14 @@ double relu_derivative(double x) {
     return (x > 0) ? 1.0 : 0.0;
 }
 
-// Framåtpropagering
-void forward_propagation(double *x, double Weight_input_hidden[NUM_HIDDEN][NUM_FEATURES], double *bias_hidden, double Weight_hidden_output[NUM_OUTPUTS][NUM_HIDDEN], double *bias_outputs, double *hidden, double *outputs) {
+void forward_propagation(double *x, double Weight_input_hidden[NUM_HIDDEN][NUM_FEATURES], double *bias_hidden, double Weight_hidden_output[NUM_OUTPUTS][NUM_HIDDEN], double *bias_outputs, double *hidden, double *outputs, double *z_hidden, double *z_output) {
     // Steg 1: Input → Hidden
     for (int i = 0; i < NUM_HIDDEN; i++) {
         double sum = bias_hidden[i];
         for (int j = 0; j < NUM_FEATURES; j++) {
             sum += x[j] * Weight_input_hidden[i][j];
         }
+        z_hidden[i] = sum;
         hidden[i] = relu(sum);
     }
 
@@ -50,6 +50,7 @@ void forward_propagation(double *x, double Weight_input_hidden[NUM_HIDDEN][NUM_F
         for (int j = 0; j < NUM_HIDDEN; j++) {
             sum += hidden[j] *  Weight_hidden_output[i][j];
         }
+        z_output[i] = sum;
         outputs[i] = relu(sum);
     }
 }
@@ -201,6 +202,42 @@ int main(void) {
             Weight_hidden_output[i][j] = ((double) rand() / RAND_MAX) - 0.5;
         }
     }
+
+
+    int epochs = 100;              // hur många varv över datan
+
+    // Buffertar för forward/backward
+    double hidden[NUM_HIDDEN];
+    double outputs[NUM_OUTPUTS];
+    double z_hidden[NUM_HIDDEN];
+    double z_output[NUM_OUTPUTS];
+
+    for (int epoch = 0; epoch < epochs; epoch++) {
+    double total_loss = 0.0;
+
+    // --- loopa över alla rader i träningsdatan ---
+    for (int i = 0; i < datasets.train.size; i++) {
+        // ---- Forward ----
+        forward_propagation(
+            datasets.train.X[i],
+            Weight_input_hidden, bias_hidden,
+            Weight_hidden_output, bias_outputs,
+            hidden, outputs,
+            z_hidden, z_output
+        );
+
+        // ---- Loss ----
+        double loss = mean_squared_error(datasets.train.y[i], outputs, NUM_OUTPUTS);
+        total_loss += loss;
+
+        // ---- Backward ----
+        back_propagation(datasets.train.X[i], datasets.train.y[i], Weight_input_hidden, bias_hidden, Weight_hidden_output, bias_outputs,hidden, outputs,z_hidden, z_output);
+    }
+
+    // skriv ut snitt-loss för den här epoken
+    printf("Epoch %d, Loss: %f\n", epoch + 1, total_loss / datasets.train.size);
+    }
+
 
     //Forward propagation for all training data
     for(int i = 0; i < datasets.train.size; i++) {
