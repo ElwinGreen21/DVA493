@@ -54,11 +54,53 @@ void forward_propagation(double *x, double Weight_input_hidden[NUM_HIDDEN][NUM_F
     }
 }
 
-
-int back_propagation() {
-    // Placeholder för bakåtpropageringslogik
-    return 0;
+// Mean Squared Error
+double mean_squared_error(double *y_true, double *y_pred, int size) {
+    double sum = 0.0;
+    for (int i = 0; i < size; i++) {
+        double diff = y_true[i] - y_pred[i];
+        sum += diff * diff;
+    }
+    return sum / size;
 }
+
+
+void back_propagation(double *x, double *y_true, double Weight_input_hidden[NUM_HIDDEN][NUM_FEATURES], double *bias_hidden, double Weight_hidden_output[NUM_OUTPUTS][NUM_HIDDEN], double *bias_outputs, double *hidden, double *outputs, double *z_hidden, double *z_output, double learning_rate) {
+    double delta_output[NUM_OUTPUTS];
+    double delta_hidden[NUM_HIDDEN];
+
+    // --- Steg 1: Output layer error ---
+    for (int i = 0; i < NUM_OUTPUTS; i++) {
+        double error = outputs[i] - y_true[i]; // dL/dy
+        delta_output[i] = error * relu_derivative(z_output[i]); // dL/dz
+    }
+
+    // --- Steg 2: Hidden layer error ---
+    for (int j = 0; j < NUM_HIDDEN; j++) {
+        double sum = 0.0;
+        for (int i = 0; i < NUM_OUTPUTS; i++) {
+            sum += delta_output[i] * Weight_hidden_output[i][j];
+        }
+        delta_hidden[j] = sum * relu_derivative(z_hidden[j]);
+    }
+
+    // --- Steg 3: Update weights Hidden → Output ---
+    for (int i = 0; i < NUM_OUTPUTS; i++) {
+        for (int j = 0; j < NUM_HIDDEN; j++) {
+            Weight_hidden_output[i][j] -= learning_rate * delta_output[i] * hidden[j];
+        }
+        bias_outputs[i] -= learning_rate * delta_output[i];
+    }
+
+    // --- Steg 4: Update weights Input → Hidden ---
+    for (int j = 0; j < NUM_HIDDEN; j++) {
+        for (int k = 0; k < NUM_FEATURES; k++) {
+            Weight_input_hidden[j][k] -= learning_rate * delta_hidden[j] * x[k];
+        }
+        bias_hidden[j] -= learning_rate * delta_hidden[j];
+    }
+}
+
 
 // randomisera data för att undvika bias och dela sedan upp i träning,test,validering
 // Fisher-Yates shuffle algorithm
