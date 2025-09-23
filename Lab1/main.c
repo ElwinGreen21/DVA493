@@ -22,10 +22,12 @@ typedef struct {
 
 
 //Vi behöver minnst 3 funktioner, en för att läsa in data, en för att träna modellen och en för att göra prediktioner.
-double output_min[NUM_OUTPUTS];
-double output_max[NUM_OUTPUTS];
+
 
 void normalize_data(double **X, double **y, int num_rows) {
+
+    double output_min[NUM_OUTPUTS];
+    double output_max[NUM_OUTPUTS];    
 
     // Initiera min/max
     for (int j = 0; j < NUM_OUTPUTS; j++) {
@@ -221,7 +223,8 @@ int main(void) {
     printf("Read %d rows\n", row);
 
     Split datasets = shuffle_data(num_rows, X, y);
-
+    normalize_data(*X, *y, num_rows);
+    
     // Initialize neural network parameters
     double hidden[NUM_HIDDEN];
     double outputs[NUM_OUTPUTS];
@@ -256,6 +259,7 @@ int main(void) {
     double z_hidden[NUM_HIDDEN];
     double z_output[NUM_OUTPUTS];  
     double loss_per_output[NUM_OUTPUTS];
+    
 
     for (int epoch = 0; epoch < epochs; epoch++) {
         double total_loss = 0.0;
