@@ -23,7 +23,7 @@ typedef struct {
 
 //Vi behöver minnst 3 funktioner, en för att läsa in data, en för att träna modellen och en för att göra prediktioner.
 
-// ReLU aktiveringsfunktion
+// ReLU aktiveringsfunktion. Intervall som i fallet med sigmoid är [0, ∞)
 double relu(double x) {
     return (x > 0) ? x : 0.0;
 }
@@ -33,6 +33,7 @@ double relu_derivative(double x) {
     return (x > 0) ? 1.0 : 0.0;
 }
 
+// Framåtpropagering
 void forward_propagation(double *x, double Weight_input_hidden[NUM_HIDDEN][NUM_FEATURES], double *bias_hidden, double Weight_hidden_output[NUM_OUTPUTS][NUM_HIDDEN], double *bias_outputs, double *hidden, double *outputs) {
     // Steg 1: Input → Hidden
     for (int i = 0; i < NUM_HIDDEN; i++) {
