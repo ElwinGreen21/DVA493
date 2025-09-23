@@ -55,15 +55,13 @@ void forward_propagation(double *x, double Weight_input_hidden[NUM_HIDDEN][NUM_F
     }
 }
 
-// Mean Squared Error
-double mean_squared_error(double *y_true, double *y_pred, int size) {
-    double sum = 0.0;
+void mse_per_output(double *y_true, double *y_pred, int size, double *loss_per_output) {
     for (int i = 0; i < size; i++) {
         double diff = y_true[i] - y_pred[i];
-        sum += diff * diff;
+        loss_per_output[i] = diff * diff;
     }
-    return sum / size;
 }
+
 
 
 void back_propagation(double *x, double *y_true, double Weight_input_hidden[NUM_HIDDEN][NUM_FEATURES], double *bias_hidden, double Weight_hidden_output[NUM_OUTPUTS][NUM_HIDDEN], double *bias_outputs, double *hidden, double *outputs, double *z_hidden, double *z_output) {
@@ -178,7 +176,7 @@ int main(void) {
 
     // Initialize neural network parameters
     double hidden[NUM_HIDDEN];
-    double outputs[NUM_OUTPUTS] = {0.0, 0.0};
+    double outputs[NUM_OUTPUTS];
 
     double Weight_input_hidden[NUM_HIDDEN][NUM_FEATURES];  // från input (16) till hidden (8)
     double bias_hidden[NUM_HIDDEN];   // bias för hidden layer
@@ -207,10 +205,9 @@ int main(void) {
     int epochs = 100;              // hur många varv över datan
 
     // Buffertar för forward/backward
-    double hidden[NUM_HIDDEN];
-    double outputs[NUM_OUTPUTS];
     double z_hidden[NUM_HIDDEN];
-    double z_output[NUM_OUTPUTS];
+    double z_output[NUM_OUTPUTS];  
+    double loss_per_output[NUM_OUTPUTS];
 
     for (int epoch = 0; epoch < epochs; epoch++) {
     double total_loss = 0.0;
@@ -221,27 +218,20 @@ int main(void) {
         forward_propagation(datasets.train.X[i], Weight_input_hidden, bias_hidden, Weight_hidden_output, bias_outputs, hidden, outputs, z_hidden, z_output);
 
         // ---- Loss ----
-        double loss = mean_squared_error(datasets.train.y[i], outputs, NUM_OUTPUTS);
-        total_loss += loss;
+        mse_per_output(datasets.train.y[i], outputs, NUM_OUTPUTS, loss_per_output);
 
         // ---- Backward ----
         back_propagation(datasets.train.X[i], datasets.train.y[i], Weight_input_hidden, bias_hidden, Weight_hidden_output, bias_outputs,hidden, outputs,z_hidden, z_output);
     }
-
     // skriv ut snitt-loss för den här epoken
-    printf("Epoch %d, Loss: %f\n", epoch + 1, total_loss / datasets.train.size);
-    }
+    printf("Loss för output 1: %f\n", loss_per_output[0]);
+    printf("Loss för output 2: %f\n", loss_per_output[1]);
 
 
-    //Forward propagation for all training data
-    for(int i = 0; i < datasets.train.size; i++) {
-
-        forward_propagation(datasets.train.X[i], Weight_input_hidden, bias_hidden, Weight_hidden_output, bias_outputs, hidden, outputs);
-    }
     //En epoch = alla träningsrader en gång (forward + backward + update).
     
-    printf("Output 1: %f\n", outputs[0]);
-    printf("Output 2: %f\n", outputs[1]);
+    //printf("Output 1: %f\n", outputs[0]);
+    //printf("Output 2: %f\n", outputs[1]);
 
 
 
