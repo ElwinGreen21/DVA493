@@ -223,8 +223,8 @@ int main(void) {
     printf("Read %d rows\n", row);
 
     Split datasets = shuffle_data(num_rows, X, y);
-    normalize_data(*X, *y, num_rows);
-    
+    normalize_data(X, y, num_rows);
+
     // Initialize neural network parameters
     double hidden[NUM_HIDDEN];
     double outputs[NUM_OUTPUTS];
