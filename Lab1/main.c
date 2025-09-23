@@ -217,7 +217,7 @@ int main(void) {
         // ---- Forward ----
         forward_propagation(datasets.train.X[i], Weight_input_hidden, bias_hidden, Weight_hidden_output, bias_outputs, hidden, outputs, z_hidden, z_output);
 
-        // ---- Loss ----
+        // ---- Loss ---- fixat
         mse_per_output(datasets.train.y[i], outputs, NUM_OUTPUTS, loss_per_output);
 
         // ---- Backward ----
