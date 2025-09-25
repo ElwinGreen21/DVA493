@@ -83,6 +83,18 @@ double relu_derivative(double x) {
     return (x > 0) ? 1.0 : 0.0;
 }
 
+// Sigmoid funktion
+double sigmoid(double x) {
+    return 1.0 / (1.0 + exp(-x));
+}
+
+// Derivatan
+double sigmoid_derivative(double x) {
+    double s = sigmoid(x);
+    return s * (1 - s);
+}
+
+
 void forward_propagation(double *x, double Weight_input_hidden[NUM_HIDDEN][NUM_FEATURES], double *bias_hidden, double Weight_hidden_output[NUM_OUTPUTS][NUM_HIDDEN], double *bias_outputs, double *hidden, double *outputs, double *z_hidden, double *z_output) {
     // Steg 1: Input → Hidden
     for (int i = 0; i < NUM_HIDDEN; i++) {
@@ -101,7 +113,7 @@ void forward_propagation(double *x, double Weight_input_hidden[NUM_HIDDEN][NUM_F
             sum += hidden[j] *  Weight_hidden_output[i][j];
         }
         z_output[i] = sum;
-        outputs[i] = relu(sum);
+        outputs[i] = sigmoid(sum);
     }
 }
 
@@ -121,7 +133,7 @@ void back_propagation(double *x, double *y_true, double Weight_input_hidden[NUM_
     // --- Steg 1: Output layer error ---
     for (int i = 0; i < NUM_OUTPUTS; i++) {
         double error = outputs[i] - y_true[i]; // dL/dy
-        delta_output[i] = error * relu_derivative(z_output[i]); // dL/dz
+        delta_output[i] = error * sigmoid_derivative(z_output[i]);
     }
 
     // --- Steg 2: Hidden layer error ---
