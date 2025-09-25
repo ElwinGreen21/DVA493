@@ -253,7 +253,7 @@ int main(void) {
     }
 
 
-    int epochs = 100;              // hur många varv över datan
+    int epochs = 100;  // hur många varv datan tränar
 
     // Buffertar för forward/backward
     double z_hidden[NUM_HIDDEN];
