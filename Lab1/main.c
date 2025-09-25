@@ -277,7 +277,7 @@ int main(void) {
     }
 
     // skriv ut snitt-loss för den här epoken
-    printf("Epoch %d, Loss: %f\n", epoch + 1, total_loss / datasets.train.size);
+    printf("Epoch %d, Compressor Loss: %f, Turbine Loss: %f\n", epoch + 1,  loss_per_output[0], loss_per_output[1]);
     }
 
 
@@ -285,8 +285,6 @@ int main(void) {
     
     //printf("Output 1: %f\n", outputs[0]);
     //printf("Output 2: %f\n", outputs[1]);
-
-
 
     // Free memory!!!!!!!!!!!!! ska nog köras sist i main
     for (int i = 0; i < num_rows; i++) {
