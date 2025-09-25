@@ -262,7 +262,7 @@ int main(void) {
     
 
     for (int epoch = 0; epoch < epochs; epoch++) {
-        double total_loss = 0.0;
+        double total_loss[] = {0.0, 0.0};
 
     // --- loopa över alla rader i träningsdatan ---
     for (int i = 0; i < datasets.train.size; i++) {
@@ -271,13 +271,15 @@ int main(void) {
 
         // ---- Loss ---- fixat
         mse_per_output(datasets.train.y[i], outputs, NUM_OUTPUTS, loss_per_output);
+        total_loss[0] += loss_per_output[0];
+        total_loss[1] += loss_per_output[1];
 
         // ---- Backward ----
         back_propagation(datasets.train.X[i], datasets.train.y[i], Weight_input_hidden, bias_hidden, Weight_hidden_output, bias_outputs,hidden, outputs,z_hidden, z_output);
     }
 
     // skriv ut snitt-loss för den här epoken
-    printf("Epoch %d, Compressor Loss: %f, Turbine Loss: %f\n", epoch + 1,  loss_per_output[0], loss_per_output[1]);
+    printf("Epoch %d, Compressor Loss: %f, Turbine Loss: %f\n", epoch + 1,  total_loss[0]/ datasets.train.size, total_loss[1]/ datasets.train.size);
     }
 
 
