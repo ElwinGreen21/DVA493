@@ -5,9 +5,10 @@
 
 #define NUM_FEATURES 16
 #define NUM_OUTPUTS 2
-#define NUM_HIDDEN 16   // du kan experimentera med storlek
-//#define learning_rate 0.001
-
+#define NUM_HIDDEN1 256   // du kan experimentera med storlek
+#define NUM_HIDDEN2 128   // andra hidden-lagret, välj storlek
+#define NUM_HIDDEN3 64
+#define NUM_HIDDEN4 32
 typedef struct {
     double **X;   // features
     double **y;   // labels
@@ -132,25 +133,50 @@ double sigmoid_derivative(double x) {
 }
 
 
-void forward_propagation(double *x, double Weight_input_hidden[NUM_HIDDEN][NUM_FEATURES], double *bias_hidden, double Weight_hidden_output[NUM_OUTPUTS][NUM_HIDDEN], double *bias_outputs, double *hidden, double *outputs, double *z_hidden, double *z_output) {
-    // Steg 1: Input → Hidden
-    for (int i = 0; i < NUM_HIDDEN; i++) {
-        double sum = bias_hidden[i];
-        for (int j = 0; j < NUM_FEATURES; j++) {
-            sum += x[j] * Weight_input_hidden[i][j];
-        }
-        z_hidden[i] = sum;
-        hidden[i] = relu(sum);
+void forward_propagation(double *x, double W_input_h1[NUM_HIDDEN1][NUM_FEATURES], double b_h1[NUM_HIDDEN1], double W_h1_h2[NUM_HIDDEN2][NUM_HIDDEN1], double b_h2[NUM_HIDDEN2], double W_h2_h3[NUM_HIDDEN3][NUM_HIDDEN2], double b_h3[NUM_HIDDEN3], double W_h3_h4[NUM_HIDDEN4][NUM_HIDDEN3], double b_h4[NUM_HIDDEN4], double W_h4_out[NUM_OUTPUTS][NUM_HIDDEN4], double b_out[NUM_OUTPUTS], double h1[NUM_HIDDEN1], double h2[NUM_HIDDEN2], double h3[NUM_HIDDEN3], double h4[NUM_HIDDEN4], double outputs[NUM_OUTPUTS], double z_h1[NUM_HIDDEN1], double z_h2[NUM_HIDDEN2], double z_h3[NUM_HIDDEN3], double z_h4[NUM_HIDDEN4], double z_out[NUM_OUTPUTS]) {
+    // Input -> H1
+    for (int i = 0; i < NUM_HIDDEN1; i++) {
+        double sum = b_h1[i];
+        for (int j = 0; j < NUM_FEATURES; j++)
+            sum += x[j] * W_input_h1[i][j];
+        z_h1[i] = sum;
+        h1[i] = relu(sum);
     }
 
-    // Steg 2: Hidden → Output
+    // H1 -> H2
+    for (int i = 0; i < NUM_HIDDEN2; i++) {
+        double sum = b_h2[i];
+        for (int j = 0; j < NUM_HIDDEN1; j++)
+            sum += h1[j] * W_h1_h2[i][j];
+        z_h2[i] = sum;
+        h2[i] = relu(sum);
+    }
+
+    // H2 -> H3
+    for (int i = 0; i < NUM_HIDDEN3; i++) {
+        double sum = b_h3[i];
+        for (int j = 0; j < NUM_HIDDEN2; j++)
+            sum += h2[j] * W_h2_h3[i][j];
+        z_h3[i] = sum;
+        h3[i] = relu(sum);
+    }
+
+    // H3 -> H4
+    for (int i = 0; i < NUM_HIDDEN4; i++) {
+        double sum = b_h4[i];
+        for (int j = 0; j < NUM_HIDDEN3; j++)
+            sum += h3[j] * W_h3_h4[i][j];
+        z_h4[i] = sum;
+        h4[i] = relu(sum);
+    }
+
+    // H4 -> Output
     for (int i = 0; i < NUM_OUTPUTS; i++) {
-        double sum = bias_outputs[i];
-        for (int j = 0; j < NUM_HIDDEN; j++) {
-            sum += hidden[j] *  Weight_hidden_output[i][j];
-        }
-        z_output[i] = sum;
-        outputs[i] = sigmoid(sum);
+        double sum = b_out[i];
+        for (int j = 0; j < NUM_HIDDEN4; j++)
+            sum += h4[j] * W_h4_out[i][j];
+        z_out[i] = sum;
+        outputs[i] = sigmoid(sum); // regression kan ev. använda linjär aktivering
     }
 }
 
@@ -163,39 +189,86 @@ void mse_per_output(double *y_true, double *y_pred, int size, double *loss_per_o
 
 
 
-void back_propagation(double *x, double *y_true, double Weight_input_hidden[NUM_HIDDEN][NUM_FEATURES], double *bias_hidden, double Weight_hidden_output[NUM_OUTPUTS][NUM_HIDDEN], double *bias_outputs, double *hidden, double *outputs, double *z_hidden, double *z_output, double learning_rate) {
-    double delta_output[NUM_OUTPUTS];
-    double delta_hidden[NUM_HIDDEN];
+void back_propagation(double *x, double *y_true, double W_input_h1[NUM_HIDDEN1][NUM_FEATURES], double b_h1[NUM_HIDDEN1], double W_h1_h2[NUM_HIDDEN2][NUM_HIDDEN1], double b_h2[NUM_HIDDEN2], double W_h2_h3[NUM_HIDDEN3][NUM_HIDDEN2], double b_h3[NUM_HIDDEN3], double W_h3_h4[NUM_HIDDEN4][NUM_HIDDEN3], double b_h4[NUM_HIDDEN4], double W_h4_out[NUM_OUTPUTS][NUM_HIDDEN4], double b_out[NUM_OUTPUTS], double h1[NUM_HIDDEN1], double h2[NUM_HIDDEN2], double h3[NUM_HIDDEN3], double h4[NUM_HIDDEN4], double outputs[NUM_OUTPUTS], double z_h1[NUM_HIDDEN1], double z_h2[NUM_HIDDEN2], double z_h3[NUM_HIDDEN3], double z_h4[NUM_HIDDEN4], double z_out[NUM_OUTPUTS], double learning_rate) {  
+    double delta_out[NUM_OUTPUTS];
+    double delta_h4[NUM_HIDDEN4];
+    double delta_h3[NUM_HIDDEN3];
+    double delta_h2[NUM_HIDDEN2];
+    double delta_h1[NUM_HIDDEN1];
 
-    // --- Steg 1: Output layer error ---
+    // Output
     for (int i = 0; i < NUM_OUTPUTS; i++) {
-        double error = outputs[i] - y_true[i]; // dL/dy
-        delta_output[i] = error * sigmoid_derivative(z_output[i]);
+        double error = outputs[i] - y_true[i];
+        delta_out[i] = error * sigmoid_derivative(z_out[i]);
     }
 
-    // --- Steg 2: Hidden layer error ---
-    for (int j = 0; j < NUM_HIDDEN; j++) {
-        double sum = 0.0;
-        for (int i = 0; i < NUM_OUTPUTS; i++) {
-            sum += delta_output[i] * Weight_hidden_output[i][j];
-        }
-        delta_hidden[j] = sum * relu_derivative(z_hidden[j]);
+    // H4
+    for (int j = 0; j < NUM_HIDDEN4; j++) {
+        double sum = 0;
+        for (int i = 0; i < NUM_OUTPUTS; i++)
+            sum += delta_out[i] * W_h4_out[i][j];
+        delta_h4[j] = sum * relu_derivative(z_h4[j]);
     }
 
-    // --- Steg 3: Update weights Hidden → Output ---
+    // H3
+    for (int j = 0; j < NUM_HIDDEN3; j++) {
+        double sum = 0;
+        for (int k = 0; k < NUM_HIDDEN4; k++)
+            sum += delta_h4[k] * W_h3_h4[k][j];
+        delta_h3[j] = sum * relu_derivative(z_h3[j]);
+    }
+
+    // H2
+    for (int j = 0; j < NUM_HIDDEN2; j++) {
+        double sum = 0;
+        for (int k = 0; k < NUM_HIDDEN3; k++)
+            sum += delta_h3[k] * W_h2_h3[k][j];
+        delta_h2[j] = sum * relu_derivative(z_h2[j]);
+    }
+
+    // H1
+    for (int j = 0; j < NUM_HIDDEN1; j++) {
+        double sum = 0;
+        for (int k = 0; k < NUM_HIDDEN2; k++)
+            sum += delta_h2[k] * W_h1_h2[k][j];
+        delta_h1[j] = sum * relu_derivative(z_h1[j]);
+    }
+
+    // H4 -> Output
     for (int i = 0; i < NUM_OUTPUTS; i++) {
-        for (int j = 0; j < NUM_HIDDEN; j++) {
-            Weight_hidden_output[i][j] -= learning_rate * delta_output[i] * hidden[j];
-        }
-        bias_outputs[i] -= learning_rate * delta_output[i];
+        for (int j = 0; j < NUM_HIDDEN4; j++)
+            W_h4_out[i][j] -= learning_rate * delta_out[i] * h4[j];
+        b_out[i] -= learning_rate * delta_out[i];
     }
 
-    // --- Steg 4: Update weights Input → Hidden ---
-    for (int j = 0; j < NUM_HIDDEN; j++) {
-        for (int k = 0; k < NUM_FEATURES; k++) {
-            Weight_input_hidden[j][k] -= learning_rate * delta_hidden[j] * x[k];
+    // H3 -> H4
+    for (int j = 0; j < NUM_HIDDEN4; j++) {
+        for (int k = 0; k < NUM_HIDDEN3; k++)
+            W_h3_h4[j][k] -= learning_rate * delta_h4[j] * h3[k];
+        b_h4[j] -= learning_rate * delta_h4[j];
+    }
+
+    // H2 -> H3
+    for (int j = 0; j < NUM_HIDDEN3; j++) {
+        for (int k = 0; k < NUM_HIDDEN2; k++)
+            W_h2_h3[j][k] -= learning_rate * delta_h3[j] * h2[k];
+        b_h3[j] -= learning_rate * delta_h3[j];
+    }
+
+    // --- H1 -> H2 ---
+    for (int i = 0; i < NUM_HIDDEN2; i++) {
+        for (int j = 0; j < NUM_HIDDEN1; j++) {
+            W_h1_h2[i][j] -= learning_rate* delta_h2[i] * h1[j];
         }
-        bias_hidden[j] -= learning_rate * delta_hidden[j];
+        b_h2[i] -= learning_rate * delta_h2[i];
+    }
+
+    // --- Input -> H1 ---
+    for (int i = 0; i < NUM_HIDDEN1; i++) {
+        for (int j = 0; j < NUM_FEATURES; j++) {
+            W_input_h1[i][j] -= learning_rate * delta_h1[i] * x[j];
+        }
+        b_h1[i] -= learning_rate * delta_h1[i];
     }
 }
 
@@ -275,30 +348,66 @@ int main(void) {
     normalize_data(&datasets);
 
     // Initialize neural network parameters
-    double hidden[NUM_HIDDEN];
+    double hidden[NUM_HIDDEN1];
     double outputs[NUM_OUTPUTS];
 
-    double Weight_input_hidden[NUM_HIDDEN][NUM_FEATURES];  // från input (16) till hidden (8)
-    double bias_hidden[NUM_HIDDEN];   // bias för hidden layer
+    // Input -> H1
+    double W_input_h1[NUM_HIDDEN1][NUM_FEATURES];
+    double b_h1[NUM_HIDDEN1];
 
-    double Weight_hidden_output[NUM_OUTPUTS][NUM_HIDDEN];   // från hidden (8) till output (2)
-    double bias_outputs[NUM_OUTPUTS];  // bias för output
+    // H1 -> H2
+    double W_h1_h2[NUM_HIDDEN2][NUM_HIDDEN1];
+    double b_h2[NUM_HIDDEN2];
+
+    // H2 -> H3
+    double W_h2_h3[NUM_HIDDEN3][NUM_HIDDEN2];
+    double b_h3[NUM_HIDDEN3];
+
+    // H3 -> H4
+    double W_h3_h4[NUM_HIDDEN4][NUM_HIDDEN3];
+    double b_h4[NUM_HIDDEN4];
+
+    // H4 -> Output
+    double W_h4_out[NUM_OUTPUTS][NUM_HIDDEN4];
+    double b_out[NUM_OUTPUTS];
+    
+    // ---buffert---
+    double z_h1[NUM_HIDDEN1], h1[NUM_HIDDEN1];
+    double z_h2[NUM_HIDDEN2], h2[NUM_HIDDEN2];
+    double z_h3[NUM_HIDDEN3], h3[NUM_HIDDEN3];
+    double z_h4[NUM_HIDDEN4], h4[NUM_HIDDEN4];
+    double z_out[NUM_OUTPUTS], outputs[NUM_OUTPUTS];
+
 
     // Initiera vikter slumpmässigt (exempel: -0.5 till 0.5)
-    for (int i = 0; i < NUM_HIDDEN; i++) {
-        bias_hidden[i] = ((double) rand() / RAND_MAX) - 0.5;
+    for (int i = 0; i < NUM_HIDDEN1; i++) {
+        b_h1[i] = ((double) rand() / RAND_MAX) - 0.5;
+        for (int j = 0; j < NUM_FEATURES; j++)
+            W_input_h1[i][j] = ((double) rand() / RAND_MAX) - 0.5;
+    }
 
-        for (int j = 0; j < NUM_FEATURES; j++) {
-            Weight_input_hidden[i][j] = ((double) rand() / RAND_MAX) - 0.5;
-        }
+    for (int i = 0; i < NUM_HIDDEN2; i++) {
+        b_h2[i] = ((double) rand() / RAND_MAX) - 0.5;
+        for (int j = 0; j < NUM_HIDDEN1; j++)
+            W_h1_h2[i][j] = ((double) rand() / RAND_MAX) - 0.5;
+    }
+
+    for (int i = 0; i < NUM_HIDDEN3; i++) {
+        b_h3[i] = ((double) rand() / RAND_MAX) - 0.5;
+        for (int j = 0; j < NUM_HIDDEN2; j++)
+            W_h2_h3[i][j] = ((double) rand() / RAND_MAX) - 0.5;
+    }
+
+    for (int i = 0; i < NUM_HIDDEN4; i++) {
+        b_h4[i] = ((double) rand() / RAND_MAX) - 0.5;
+        for (int j = 0; j < NUM_HIDDEN3; j++)
+            W_h3_h4[i][j] = ((double) rand() / RAND_MAX) - 0.5;
     }
 
     for (int i = 0; i < NUM_OUTPUTS; i++) {
-        bias_outputs[i] = ((double) rand() / RAND_MAX) - 0.5;
-        
-        for (int j = 0; j < NUM_HIDDEN; j++) {
-            Weight_hidden_output[i][j] = ((double) rand() / RAND_MAX) - 0.5;
-        }
+        b_out[i] = ((double) rand() / RAND_MAX) - 0.5;
+        for (int j = 0; j < NUM_HIDDEN4; j++)
+            W_h4_out[i][j] = ((double) rand() / RAND_MAX) - 0.5;
     }
 
 
@@ -307,8 +416,7 @@ int main(void) {
     double decay = 0.99;  // 5% minskning per epoch
 
     // Buffertar för forward/backward
-    double z_hidden[NUM_HIDDEN];
-    double z_output[NUM_OUTPUTS];  
+   
     double loss_per_output[NUM_OUTPUTS];
     
 
@@ -319,7 +427,7 @@ int main(void) {
     // --- loopa över alla rader i träningsdatan ---
     for (int i = 0; i < datasets.train.size; i++) {
         // ---- Forward ----
-        forward_propagation(datasets.train.X[i], Weight_input_hidden, bias_hidden, Weight_hidden_output, bias_outputs, hidden, outputs, z_hidden, z_output);
+        forward_propagation(datasets.train.X[i], W_input_h1, b_h1, W_h1_h2, b_h2, W_h2_h3, b_h3, W_h3_h4, b_h4, W_h4_out, b_out, h1, h2, h3, h4, outputs, z_h1, z_h2, z_h3, z_h4, z_out);
 
         // ---- Loss ---- fixat
         mse_per_output(datasets.train.y[i], outputs, NUM_OUTPUTS, loss_per_output);
@@ -327,7 +435,7 @@ int main(void) {
         total_loss[1] += loss_per_output[1];
 
         // ---- Backward ----
-        back_propagation(datasets.train.X[i], datasets.train.y[i], Weight_input_hidden, bias_hidden, Weight_hidden_output, bias_outputs,hidden, outputs,z_hidden, z_output, current_lr);
+        back_propagation(datasets.train.X[i], datasets.train.y[i], W_input_h1, b_h1, W_h1_h2, b_h2, W_h2_h3, b_h3, W_h3_h4, b_h4, W_h4_out, b_out, h1, h2, h3, h4, outputs, z_h1, z_h2, z_h3, z_h4, z_out, current_lr);
     }
 
     // skriv ut snitt-loss för den här epoken
@@ -337,7 +445,7 @@ int main(void) {
     double val_loss_outputs[NUM_OUTPUTS] = {0};
 
     for (int i = 0; i < datasets.val.size; i++) {
-        forward_propagation(datasets.val.X[i], Weight_input_hidden, bias_hidden, Weight_hidden_output, bias_outputs, hidden, outputs, z_hidden, z_output);
+        forward_propagation(datasets.val.X[i], W_input_h1, b_h1, W_h1_h2, b_h2, W_h2_h3, b_h3, W_h3_h4, b_h4, W_h4_out, b_out, h1, h2, h3, h4, outputs, z_h1, z_h2, z_h3, z_h4, z_out);
 
         mse_per_output(datasets.val.y[i], outputs, NUM_OUTPUTS, loss_per_output);
 
@@ -354,7 +462,7 @@ int main(void) {
     double test_loss_outputs[NUM_OUTPUTS] = {0};
 
     for (int i = 0; i < datasets.test.size; i++) {
-        forward_propagation(datasets.test.X[i], Weight_input_hidden, bias_hidden, Weight_hidden_output, bias_outputs, hidden, outputs, z_hidden, z_output);
+        forward_propagation(datasets.test.X[i], W_input_h1, b_h1, W_h1_h2, b_h2, W_h2_h3, b_h3, W_h3_h4, b_h4, W_h4_out, b_out, h1, h2, h3, h4, outputs, z_h1, z_h2, z_h3, z_h4, z_out);
 
         mse_per_output(datasets.test.y[i], outputs, NUM_OUTPUTS, loss_per_output);
 
