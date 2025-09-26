@@ -292,7 +292,40 @@ int main(void) {
 
     // skriv ut snitt-loss för den här epoken
     printf("Epoch %d, Compressor Loss: %f, Turbine Loss: %f\n", epoch + 1,  total_loss[0]/ datasets.train.size, total_loss[1]/ datasets.train.size);
+
+        // --- Valideringsloss ---
+    double val_loss_outputs[NUM_OUTPUTS] = {0};
+
+    for (int i = 0; i < datasets.val.size; i++) {
+        forward_propagation(datasets.val.X[i], Weight_input_hidden, bias_hidden, Weight_hidden_output, bias_outputs, hidden, outputs, z_hidden, z_output);
+
+        mse_per_output(datasets.val.y[i], outputs, NUM_OUTPUTS, loss_per_output);
+
+        for (int k = 0; k < NUM_OUTPUTS; k++) {
+            val_loss_outputs[k] += loss_per_output[k];
+        }
     }
+
+    printf("Validation Loss -> Compressor: %f, Turbine: %f\n", val_loss_outputs[0] / datasets.val.size, val_loss_outputs[1] / datasets.val.size);
+
+    } // end epochs
+
+        // --- Testloss (slutlig utvärdering) ---
+    double test_loss_outputs[NUM_OUTPUTS] = {0};
+
+    for (int i = 0; i < datasets.test.size; i++) {
+        forward_propagation(datasets.test.X[i], Weight_input_hidden, bias_hidden, Weight_hidden_output, bias_outputs, hidden, outputs, z_hidden, z_output);
+
+        mse_per_output(datasets.test.y[i], outputs, NUM_OUTPUTS, loss_per_output);
+
+        for (int k = 0; k < NUM_OUTPUTS; k++) {
+            test_loss_outputs[k] += loss_per_output[k];
+        }
+    }
+
+    printf("Final Test Loss -> Compressor: %f, Turbine: %f\n",
+        test_loss_outputs[0] / datasets.test.size,
+        test_loss_outputs[1] / datasets.test.size);
 
 
     //En epoch = alla träningsrader en gång (forward + backward + update).
