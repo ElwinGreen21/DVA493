@@ -132,6 +132,16 @@ double sigmoid_derivative(double x) {
     return s * (1 - s);
 }
 
+// tanh aktiveringsfunktion
+double tanh(double x) {
+    return tanh(x);   // finns i math.h
+}
+
+// Derivata av tanh: 1 - tanh(x)^2
+double tanh_derivative(double x) {
+    double t = tanh(x);
+    return 1.0 - t * t;
+}
 
 void forward_propagation(double *x, double W_input_h1[NUM_HIDDEN1][NUM_FEATURES], double b_h1[NUM_HIDDEN1], double W_h1_h2[NUM_HIDDEN2][NUM_HIDDEN1], double b_h2[NUM_HIDDEN2], double W_h2_h3[NUM_HIDDEN3][NUM_HIDDEN2], double b_h3[NUM_HIDDEN3], double W_h3_h4[NUM_HIDDEN4][NUM_HIDDEN3], double b_h4[NUM_HIDDEN4], double W_h4_out[NUM_OUTPUTS][NUM_HIDDEN4], double b_out[NUM_OUTPUTS], double h1[NUM_HIDDEN1], double h2[NUM_HIDDEN2], double h3[NUM_HIDDEN3], double h4[NUM_HIDDEN4], double outputs[NUM_OUTPUTS], double z_h1[NUM_HIDDEN1], double z_h2[NUM_HIDDEN2], double z_h3[NUM_HIDDEN3], double z_h4[NUM_HIDDEN4], double z_out[NUM_OUTPUTS]) {
     // Input -> H1
@@ -140,7 +150,7 @@ void forward_propagation(double *x, double W_input_h1[NUM_HIDDEN1][NUM_FEATURES]
         for (int j = 0; j < NUM_FEATURES; j++)
             sum += x[j] * W_input_h1[i][j];
         z_h1[i] = sum;
-        h1[i] = relu(sum);
+        h1[i] = sigmoid(sum);
     }
 
     // H1 -> H2
@@ -149,7 +159,7 @@ void forward_propagation(double *x, double W_input_h1[NUM_HIDDEN1][NUM_FEATURES]
         for (int j = 0; j < NUM_HIDDEN1; j++)
             sum += h1[j] * W_h1_h2[i][j];
         z_h2[i] = sum;
-        h2[i] = relu(sum);
+        h2[i] = sigmoid(sum);
     }
 
     // H2 -> H3
@@ -158,7 +168,7 @@ void forward_propagation(double *x, double W_input_h1[NUM_HIDDEN1][NUM_FEATURES]
         for (int j = 0; j < NUM_HIDDEN2; j++)
             sum += h2[j] * W_h2_h3[i][j];
         z_h3[i] = sum;
-        h3[i] = relu(sum);
+        h3[i] = sigmoid(sum);
     }
 
     // H3 -> H4
@@ -167,7 +177,7 @@ void forward_propagation(double *x, double W_input_h1[NUM_HIDDEN1][NUM_FEATURES]
         for (int j = 0; j < NUM_HIDDEN3; j++)
             sum += h3[j] * W_h3_h4[i][j];
         z_h4[i] = sum;
-        h4[i] = relu(sum);
+        h4[i] = sigmoid(sum);
     }
 
     // H4 -> Output
@@ -207,7 +217,7 @@ void back_propagation(double *x, double *y_true, double W_input_h1[NUM_HIDDEN1][
         double sum = 0;
         for (int i = 0; i < NUM_OUTPUTS; i++)
             sum += delta_out[i] * W_h4_out[i][j];
-        delta_h4[j] = sum * relu_derivative(z_h4[j]);
+        delta_h4[j] = sum * sigmoid_derivative(z_h4[j]);
     }
 
     // H3
@@ -215,7 +225,7 @@ void back_propagation(double *x, double *y_true, double W_input_h1[NUM_HIDDEN1][
         double sum = 0;
         for (int k = 0; k < NUM_HIDDEN4; k++)
             sum += delta_h4[k] * W_h3_h4[k][j];
-        delta_h3[j] = sum * relu_derivative(z_h3[j]);
+        delta_h3[j] = sum * sigmoid_derivative(z_h3[j]);
     }
 
     // H2
@@ -223,7 +233,7 @@ void back_propagation(double *x, double *y_true, double W_input_h1[NUM_HIDDEN1][
         double sum = 0;
         for (int k = 0; k < NUM_HIDDEN3; k++)
             sum += delta_h3[k] * W_h2_h3[k][j];
-        delta_h2[j] = sum * relu_derivative(z_h2[j]);
+        delta_h2[j] = sum * sigmoid_derivative(z_h2[j]);
     }
 
     // H1
@@ -231,7 +241,7 @@ void back_propagation(double *x, double *y_true, double W_input_h1[NUM_HIDDEN1][
         double sum = 0;
         for (int k = 0; k < NUM_HIDDEN2; k++)
             sum += delta_h2[k] * W_h1_h2[k][j];
-        delta_h1[j] = sum * relu_derivative(z_h1[j]);
+        delta_h1[j] = sum * sigmoid_derivative(z_h1[j]);
     }
 
     // H4 -> Output
@@ -376,7 +386,7 @@ int main(void) {
     double z_h2[NUM_HIDDEN2], h2[NUM_HIDDEN2];
     double z_h3[NUM_HIDDEN3], h3[NUM_HIDDEN3];
     double z_h4[NUM_HIDDEN4], h4[NUM_HIDDEN4];
-    double z_out[NUM_OUTPUTS], outputs[NUM_OUTPUTS];
+    double z_out[NUM_OUTPUTS];
 
 
     // Initiera vikter slumpmässigt (exempel: -0.5 till 0.5)
