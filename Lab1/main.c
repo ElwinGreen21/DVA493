@@ -24,55 +24,92 @@ typedef struct {
 //Vi behöver minnst 3 funktioner, en för att läsa in data, en för att träna modellen och en för att göra prediktioner.
 
 
-void normalize_data(double **X, double **y, int num_rows) {
+void normalize_data(Split *datasets) {
 
     double output_min[NUM_OUTPUTS];
     double output_max[NUM_OUTPUTS];    
 
     // Initiera min/max
     for (int j = 0; j < NUM_OUTPUTS; j++) {
-        output_min[j] = y[0][j];
-        output_max[j] = y[0][j];
+        output_min[j] = datasets->train.y[0][j];
+        output_max[j] = datasets->train.y[0][j];
     }
 
     // Hitta min/max
-    for (int i = 0; i < num_rows; i++) {
+    for (int i = 0; i < datasets->train.size; i++) {
         for (int j = 0; j < NUM_OUTPUTS; j++) {
-            if (y[i][j] < output_min[j]) output_min[j] = y[i][j];
-            if (y[i][j] > output_max[j]) output_max[j] = y[i][j];
+            if (datasets->train.y[i][j] < output_min[j]) output_min[j] = datasets->train.y[i][j];
+            if (datasets->train.y[i][j] > output_max[j]) output_max[j] = datasets->train.y[i][j];
         }
     }
 
-    // Skala till [0,1]
-    for (int i = 0; i < num_rows; i++) {
+    // Normalisera train
+    for (int i = 0; i < datasets->train.size; i++) {
         for (int j = 0; j < NUM_OUTPUTS; j++) {
-            y[i][j] = (y[i][j] - output_min[j]) / (output_max[j] - output_min[j]);
+            datasets->train.y[i][j] =
+                (datasets->train.y[i][j] - output_min[j]) / (output_max[j] - output_min[j]);
         }
     }
+
+    // Normalisera val
+    for (int i = 0; i < datasets->val.size; i++) {
+        for (int j = 0; j < NUM_OUTPUTS; j++) {
+            datasets->val.y[i][j] =
+                (datasets->val.y[i][j] - output_min[j]) / (output_max[j] - output_min[j]);
+        }
+    }
+
+    // Normalisera test
+    for (int i = 0; i < datasets->test.size; i++) {
+        for (int j = 0; j < NUM_OUTPUTS; j++) {
+            datasets->test.y[i][j] =
+                (datasets->test.y[i][j] - output_min[j]) / (output_max[j] - output_min[j]);
+        }
+    }
+
     double feature_min[NUM_FEATURES];
     double feature_max[NUM_FEATURES];
 
     // 1. Initiera min/max
     for (int j = 0; j < NUM_FEATURES; j++) {
-        feature_min[j] = X[0][j];
-        feature_max[j] = X[0][j];
+        feature_min[j] = datasets->train.X[0][j];
+        feature_max[j] = datasets->train.X[0][j];
     }
 
     // 2. Hitta min och max över hela datasetet
-    for (int i = 0; i < num_rows; i++) {
+    for (int i = 0; i < datasets->train.size; i++) {
         for (int j = 0; j < NUM_FEATURES; j++) {
-            if (X[i][j] < feature_min[j]) feature_min[j] = X[i][j];
-            if (X[i][j] > feature_max[j]) feature_max[j] = X[i][j];
+            if (datasets->train.X[i][j] < feature_min[j]) feature_min[j] = datasets->train.X[i][j];
+            if (datasets->train.X[i][j] > feature_max[j]) feature_max[j] = datasets->train.X[i][j];
         }
     }
 
-    // 3. Skala varje feature till [0,1]
-    for (int i = 0; i < num_rows; i++) {
+
+    // Normalisera train
+    for (int i = 0; i < datasets->train.size; i++) {
         for (int j = 0; j < NUM_FEATURES; j++) {
-            X[i][j] = (X[i][j] - feature_min[j]) / (feature_max[j] - feature_min[j]);
+            datasets->train.X[i][j] =
+                (datasets->train.X[i][j] - feature_min[j]) / (feature_max[j] - feature_min[j]);
+        }
+    }
+
+    // Normalisera val
+    for (int i = 0; i < datasets->val.size; i++) {
+        for (int j = 0; j < NUM_FEATURES; j++) {
+            datasets->val.X[i][j] =
+                (datasets->val.X[i][j] - feature_min[j]) / (feature_max[j] - feature_min[j]);
+        }
+    }
+
+    // Normalisera test
+    for (int i = 0; i < datasets->test.size; i++) {
+        for (int j = 0; j < NUM_FEATURES; j++) {
+            datasets->test.X[i][j] =
+                (datasets->test.X[i][j] - feature_min[j]) / (feature_max[j] - feature_min[j]);
         }
     }
 }
+
 // ReLU aktiveringsfunktion
 double relu(double x) {
     return (x > 0) ? x : 0.0;
@@ -235,7 +272,7 @@ int main(void) {
     printf("Read %d rows\n", row);
 
     Split datasets = shuffle_data(num_rows, X, y);
-    normalize_data(X, y, num_rows);
+    normalize_data(&datasets);
 
     // Initialize neural network parameters
     double hidden[NUM_HIDDEN];
