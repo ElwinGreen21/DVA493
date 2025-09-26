@@ -267,7 +267,7 @@ int main(void) {
 
     int epochs = 1000;  // hur många varv datan tränar
     double base_lr = 0.001;   // start learning rate
-    double decay = 0.95;  // 5% minskning per epoch
+    double decay = 0.99;  // 5% minskning per epoch
 
     // Buffertar för forward/backward
     double z_hidden[NUM_HIDDEN];
