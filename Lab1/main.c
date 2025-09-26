@@ -6,7 +6,7 @@
 #define NUM_FEATURES 16
 #define NUM_OUTPUTS 2
 #define NUM_HIDDEN 16   // du kan experimentera med storlek
-#define learning_rate 0.001
+//#define learning_rate 0.001
 
 typedef struct {
     double **X;   // features
@@ -163,7 +163,7 @@ void mse_per_output(double *y_true, double *y_pred, int size, double *loss_per_o
 
 
 
-void back_propagation(double *x, double *y_true, double Weight_input_hidden[NUM_HIDDEN][NUM_FEATURES], double *bias_hidden, double Weight_hidden_output[NUM_OUTPUTS][NUM_HIDDEN], double *bias_outputs, double *hidden, double *outputs, double *z_hidden, double *z_output) {
+void back_propagation(double *x, double *y_true, double Weight_input_hidden[NUM_HIDDEN][NUM_FEATURES], double *bias_hidden, double Weight_hidden_output[NUM_OUTPUTS][NUM_HIDDEN], double *bias_outputs, double *hidden, double *outputs, double *z_hidden, double *z_output, double learning_rate) {
     double delta_output[NUM_OUTPUTS];
     double delta_hidden[NUM_HIDDEN];
 
@@ -302,7 +302,9 @@ int main(void) {
     }
 
 
-    int epochs = 100;  // hur många varv datan tränar
+    int epochs = 1000;  // hur många varv datan tränar
+    double base_lr = 0.001;   // start learning rate
+    double decay = 0.95;  // 5% minskning per epoch
 
     // Buffertar för forward/backward
     double z_hidden[NUM_HIDDEN];
@@ -310,7 +312,8 @@ int main(void) {
     double loss_per_output[NUM_OUTPUTS];
     
 
-    for (int epoch = 0; epoch < epochs; epoch++) {
+    for (int epoch = 0; epoch < epochs; epoch++) { //start epochs
+        double current_lr = base_lr * pow(decay, epoch);
         double total_loss[] = {0.0, 0.0};
 
     // --- loopa över alla rader i träningsdatan ---
@@ -324,7 +327,7 @@ int main(void) {
         total_loss[1] += loss_per_output[1];
 
         // ---- Backward ----
-        back_propagation(datasets.train.X[i], datasets.train.y[i], Weight_input_hidden, bias_hidden, Weight_hidden_output, bias_outputs,hidden, outputs,z_hidden, z_output);
+        back_propagation(datasets.train.X[i], datasets.train.y[i], Weight_input_hidden, bias_hidden, Weight_hidden_output, bias_outputs,hidden, outputs,z_hidden, z_output, current_lr);
     }
 
     // skriv ut snitt-loss för den här epoken
