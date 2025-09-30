@@ -324,7 +324,7 @@ int main(void) {
     }
 
     int epochs = 1000;
-    double learning_rate = 0.001;
+    double learning_rate = 0.003;
     double val_check = 0.0;
     int times_no_improve = 0;
 
@@ -368,8 +368,10 @@ int main(void) {
             times_no_improve = 0;
         } else {
             times_no_improve++;
-            if( times_no_improve >= 10 ){
+            if( times_no_improve >= 10 || epochs == 500 || epochs == 700){
                 learning_rate *= 0.99;
+                times_no_improve = 0;
+                printf("Learning rate minskad till %f\n", learning_rate);
             }
         }
             
