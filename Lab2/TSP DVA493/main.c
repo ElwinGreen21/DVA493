@@ -25,7 +25,7 @@ Individual population[POP_SIZE];
 Individual newPop[POP_SIZE];
 Individual bestEver;
 
-// ----------- helpfunctions -----------------
+
 double euclidean(int i, int j) {
     double dx = coords[i][0] - coords[j][0];
     double dy = coords[i][1] - coords[j][1];
@@ -93,7 +93,12 @@ void crossover(Individual* p1, Individual* p2, Individual* child) {
     //A mix of parents that creates a child
     int start = rand() % (N - 1);
     int end = rand() % (N - 1);
-    if (start > end) { int tmp = start; start = end; end = tmp; }
+
+    if (start > end) { 
+        int tmp = start; 
+        start = end; 
+        end = tmp; 
+    }
 
     int used[N + 1] = { 0 };
     for (int i = start; i <= end; i++) {
@@ -117,7 +122,6 @@ void mutate2opt(Individual* ind) {
     int i = rand() % (N - 2);
     int j = i + 1 + rand() % (N - 2 - i);
 
-    
     while (i < j) {
         int tmp = ind->route[i];
         ind->route[i] = ind->route[j];
@@ -143,7 +147,7 @@ void local2opt(Individual* ind) {
                 double newDist = distMatrix[a][c] + distMatrix[b][d];
 
                 if (newDist < oldDist) {
-                    // v�nd segment [i..j]
+                    // turn segment [i..j]
                     int left = i, right = j;
                     while (left < right) {
                         int tmp = ind->route[left];
@@ -219,7 +223,7 @@ int main() {
     srand(time(NULL));
 
     FILE* fp = fopen("berlin52.tsp", "r");
-    if (!fp) { printf("Kunde inte �ppna berlin52.tsp\n"); return 1; }
+    if (!fp) { printf("couldn't open berlin52.tsp\n"); return 1; }
 
     char line[256];
     while (fgets(line, sizeof(line), fp)) {
