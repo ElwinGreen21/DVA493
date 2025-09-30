@@ -323,8 +323,10 @@ int main(void) {
         for (int j = 0; j < NUM_HIDDEN4; j++) W_h4_out[i][j] = rand_uniform() * scale;
     }
 
-    int epochs = 200;
+    int epochs = 1000;
     double learning_rate = 0.001;
+    double val_check = 0.0;
+    int times_no_improve = 0;
 
     for (int e = 0; e < epochs; e++) {
         double train_loss = 0.0;
@@ -360,12 +362,23 @@ int main(void) {
             val_loss += (loss[0] + loss[1]) / 2.0;
         }
         val_loss /= datasets.val.size;
+        // minska learning rate om ingen förbättring på 10 epoker
+        if( val_check == 0.0 || val_loss < val_check ){
+            val_check = val_loss;
+            times_no_improve = 0;
+        } else {
+            times_no_improve++;
+            if( times_no_improve >= 10 ){
+                learning_rate *= 0.99;
+            }
+        }
+            
 
         printf("Epoch %d: Train Loss = %f, Val Loss = %f\n", e + 1, train_loss, val_loss);
     }
 
     // Test
-    double test_loss = 0.0;
+    double test_loss[NUM_OUTPUTS] = {0.0, 0.0};
     for (int i = 0; i < datasets.test.size; i++) {
         forward_propagation(datasets.test.X[i],
             W_input_h1, b_h1, W_h1_h2, b_h2, W_h2_h3, b_h3,
@@ -374,15 +387,17 @@ int main(void) {
             z_h1, z_h2, z_h3, z_h4, z_out);
 
         for (int j = 0; j < NUM_OUTPUTS; j++) {
-            double pred_denorm = denorm_output(outputs[j], output_min[j], output_max[j]);
-            double true_denorm = denorm_output(datasets.test.y[i][j], output_min[j], output_max[j]);
-            double diff = pred_denorm - true_denorm;
-            test_loss += diff * diff;
-        }
+        double pred_denorm = denorm_output(outputs[j], output_min[j], output_max[j]);
+        double true_denorm = denorm_output(datasets.test.y[i][j], output_min[j], output_max[j]);
+        double diff = pred_denorm - true_denorm;
+        test_loss[j] += diff * diff;
     }
-    test_loss /= (datasets.test.size * NUM_OUTPUTS);
-    printf("Test Loss (MSE) = %f\n", test_loss);
+    }
 
+    test_loss[0] /= datasets.test.size;
+    printf("Test Loss (MSE) för output  compressor = %.10e\n", test_loss[0]);
+    test_loss[1] /= datasets.test.size;
+    printf("Test Loss (MSE) för output  turbine = %.10e\n", test_loss[1]);
     fclose(file);
     return 0;
 }
