@@ -5,10 +5,10 @@
 
 #define NUM_FEATURES 16
 #define NUM_OUTPUTS 2
-#define NUM_HIDDEN1 64
-#define NUM_HIDDEN2 32
-#define NUM_HIDDEN3 16
-#define NUM_HIDDEN4 8
+#define NUM_HIDDEN1 256
+#define NUM_HIDDEN2 128
+#define NUM_HIDDEN3 64
+#define NUM_HIDDEN4 32
 
 typedef struct {
     double **X;
@@ -220,7 +220,6 @@ void back_propagation(double *x, double *y_true,
             W_input_h1[i][j] -= learning_rate * delta_h1[i] * x[j];
         b_h1[i] -= learning_rate * delta_h1[i];
     }
-
 }
 
 // ------------------- Shuffle & split -------------------
@@ -324,8 +323,8 @@ int main(void) {
         for (int j = 0; j < NUM_HIDDEN4; j++) W_h4_out[i][j] = rand_uniform() * scale;
     }
 
-    int epochs = 10000;
-    double learning_rate = 0.003;
+    int epochs = 1500;
+    double learning_rate = 0.0025;
     double val_check = 0.0;
     int times_no_improve = 0;
 
@@ -369,17 +368,11 @@ int main(void) {
             times_no_improve = 0;
         } else {
             times_no_improve++;
-            if( times_no_improve >= 10){
-                learning_rate *= 0.95;
-                times_no_improve = 0;
-                printf("Learning rate minskad till %f\n", learning_rate);
+            if( times_no_improve >= 10 ){
+                learning_rate *= 0.925;
+                printf("No improvement, reducing learning rate to %f\n", learning_rate);
             }
         }
-        if (e == 9000){
-            learning_rate = 0.0001;
-            printf("Learning rate satt till %f\n", learning_rate);
-        }
-        
             
 
         printf("Epoch %d: Train Loss = %f, Val Loss = %f\n", e + 1, train_loss, val_loss);

@@ -1,17 +1,14 @@
 //Assignment 3: Unsupervised Learning
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 
 #define ROWS 178
-#define COLS 14
+#define COLS 13
 
-int main() {
+int file_reader(int classes[ROWS], double data[ROWS][COLS]) {
     FILE *fp;
     int i, j;
-
-    // En kolumn för klass (int) och en matris för features (double)
-    int classes[ROWS];
-    double data[ROWS][COLS - 1]; // 13 features
 
     fp = fopen("WINE.txt", "r");
     if (fp == NULL) {
@@ -26,7 +23,7 @@ int main() {
             return 1;
         }
         // Läs sedan features
-        for (j = 0; j < COLS - 1; j++) {
+        for (j = 0; j < COLS; j++) {
             if (fscanf(fp, "%lf", &data[i][j]) != 1) {
                 fprintf(stderr, "Fel vid läsning av feature på rad %d kolumn %d\n", i+1, j+1);
                 return 1;
@@ -35,14 +32,59 @@ int main() {
     }
 
     fclose(fp);
+    return 0;
+}
 
+int normilize_data(double data[ROWS][COLS]) {
+    int j = 0;
+    int i = 0;
+    double sum = 0.0;
+    double mean = 0.0;
+    
+    for(j = 0; j < COLS; j++){
+        sum = 0.0;
+        mean = 0.0;
+        
+            
+        for (i = 0; i < ROWS; i++) {
+            sum += data[i][j];
+        }
+        mean = sum / ROWS;
+        
+        for (i = 0; i < ROWS; i++) {
+            data[i][j] -= mean;
+        }
+        
+    }
+
+    return 0;
+}
+
+compute_covariance(double data[ROWS][COLS], double cov[COLS][COLS]) {
+
+}
+
+
+int main() {
+    
+
+    // En kolumn för klass (int) och en matris för features (double)
+    int classes[ROWS];
+    double data[ROWS][COLS]; 
+    double cov[COLS][COLS];
+
+    file_reader(classes, data);
+    normilize_data(data);
+    
+    ///*
     // Testutskrift: första raden
     printf("Klass: %d\n", classes[0]);
     printf("Features: ");
-    for (j = 0; j < COLS - 1; j++) {
+    for (int j = 0; j < COLS - 1; j++) {
         printf("%lf ", data[0][j]);
     }
     printf("\n");
 
     return 0;
+    //*/
 }
