@@ -44,24 +44,36 @@ int normilize_data(double data[ROWS][COLS]) {
     for(j = 0; j < COLS; j++){
         sum = 0.0;
         mean = 0.0;
-        
-            
+         
         for (i = 0; i < ROWS; i++) {
             sum += data[i][j];
         }
         mean = sum / ROWS;
-        
         for (i = 0; i < ROWS; i++) {
             data[i][j] -= mean;
         }
-        
     }
 
     return 0;
 }
 
 compute_covariance(double data[ROWS][COLS], double cov[COLS][COLS]) {
+    int i = 0;
+    int j = 0;
+    int k = 0;
 
+    for (i = 0; i < COLS; i++) {
+        for (j = 0; j < COLS; j++) {
+            cov[i][j] = 0.0;
+            
+            for (k = 0; k < ROWS; k++) {
+                cov[i][j] += data[k][i] * data[k][j];
+            }
+            cov[i][j] /= (ROWS - 1); 
+        }
+    }
+
+    return 0;
 }
 
 
