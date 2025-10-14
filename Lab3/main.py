@@ -61,6 +61,21 @@ def kmeans(data, k=3, max_iters=100, tol=1e-4):
     np.random.seed(42)  
     centroids = data[np.random.choice(data.shape[0], k, replace=False)]
 
+    for iteration in range(max_iters):
+        # Step 1: Assign each point to the nearest centroid
+        distances = np.linalg.norm(data[:, np.newaxis] - centroids, axis=2)  # Shape: (n_samples, k)
+        labels = np.argmin(distances, axis=1)
+        
+        # Step 2: Update centroids as the mean of assigned points
+        new_centroids = np.array([data[labels == i].mean(axis=0) for i in range(k)])
+        
+        # Step 3: Check for convergence
+        if np.all(np.linalg.norm(new_centroids - centroids, axis=1) < tol):
+            break
+        
+        centroids = new_centroids
+    
+    return labels, centroids
 
 
 
@@ -71,10 +86,22 @@ def main():
     cov = compute_covariance(data)
     new_features, eigenvalues, eigenvectors = compute_pca(cov, data)
 
-    # Test print: first row
-    print(f"Klass: {classes[0]}")
-    print("Normalized Features:", " ".join(f"{x:.4f}" for x in data[0]))
-    print("PCA Features:", " ".join(f"{x:.4f}" for x in new_features[0]))
+    k = 3
+
+    
+    for n_components in [2, 5, 8]:
+        reduced_data = new_features[:, :n_components]
+
+        labels, centroids = kmeans(reduced_data, k=k)
+
+        
+        cluster_sizes = np.bincount(labels)
+
+        
+        print(f"\nK-means with top {n_components} principal components:")
+        for i in range(k):
+            print(f"  Cluster {i+1}: {cluster_sizes[i]} points")
+        print(f"  Centroid shape: {centroids.shape}")  
 
 
 if __name__ == "__main__":
