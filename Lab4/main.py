@@ -1,4 +1,7 @@
 import math
+import os
+
+os.chdir(os.path.dirname(__file__))
 
 def read_graph(filename):
     edges = []
