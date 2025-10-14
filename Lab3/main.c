@@ -2,6 +2,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <gsl/gsl_matrix.h>
+#include <gsl/gsl_eigen.h>
 
 #define ROWS 178
 #define COLS 13
@@ -57,7 +59,7 @@ int normilize_data(double data[ROWS][COLS]) {
     return 0;
 }
 
-compute_covariance(double data[ROWS][COLS], double cov[COLS][COLS]) {
+int compute_covariance(double data[ROWS][COLS], double cov[COLS][COLS]) {
     int i = 0;
     int j = 0;
     int k = 0;
@@ -65,7 +67,7 @@ compute_covariance(double data[ROWS][COLS], double cov[COLS][COLS]) {
     for (i = 0; i < COLS; i++) {
         for (j = 0; j < COLS; j++) {
             cov[i][j] = 0.0;
-            
+
             for (k = 0; k < ROWS; k++) {
                 cov[i][j] += data[k][i] * data[k][j];
             }
@@ -74,6 +76,10 @@ compute_covariance(double data[ROWS][COLS], double cov[COLS][COLS]) {
     }
 
     return 0;
+}
+
+int compute_pca(){
+
 }
 
 
