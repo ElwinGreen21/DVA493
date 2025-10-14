@@ -1,6 +1,7 @@
 # Assignment 3: Unsupervised Learning
 import numpy as np
 import os
+import matplotlib.pyplot as plt
 
 ROWS = 178
 COLS = 13
@@ -102,6 +103,35 @@ def main():
         for i in range(k):
             print(f"  Cluster {i+1}: {cluster_sizes[i]} points")
         print(f"  Centroid shape: {centroids.shape}")  
+
+        
+        if n_components == 2:
+            plt.figure(figsize=(7, 5))
+            for cluster_id in range(k):
+                cluster_points = reduced_data[labels == cluster_id]
+                plt.scatter(
+                    cluster_points[:, 0],
+                    cluster_points[:, 1],
+                    label=f"Cluster {cluster_id+1}",
+                    alpha=0.7
+                )
+
+            # Plot centroids
+            plt.scatter(
+                centroids[:, 0],
+                centroids[:, 1],
+                c="black",
+                marker="X",
+                s=200,
+                label="Centroids"
+            )
+
+            plt.title("K-means Clustering (Top 2 Principal Components)")
+            plt.xlabel("Principal Component 1")
+            plt.ylabel("Principal Component 2")
+            plt.legend()
+            plt.grid(True)
+            plt.show()
 
 
 if __name__ == "__main__":
