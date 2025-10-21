@@ -9,11 +9,15 @@ def read_graph(filename):
         with open(filename, "r") as f:
             for line in f:
                 parts = line.strip().split()
-                if len(parts) == 3 and parts[0].isalpha() and parts[1].isalpha():
-                    u, v, w = parts
-                    w = int(w)
-                    edges.append((u, v, w))
-                    edges.append((v, u, w))  # eftersom vägarna är dubbla
+                # Hoppa över rubriker och tomma rader
+                if len(parts) != 3:
+                    continue
+                u, v, w = parts
+                if not (u.isalpha() and v.isalpha() and w.isdigit()):
+                    continue
+                w = int(w)
+                edges.append((u, v, w))
+                edges.append((v, u, w))  # eftersom vägarna är dubbla
     except FileNotFoundError:
         print(f"Filen '{filename}' hittades inte!")
     return edges
