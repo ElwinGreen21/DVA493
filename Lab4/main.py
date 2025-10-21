@@ -19,7 +19,7 @@ def read_graph(filename):
                 edges.append((u, v, w))
                 edges.append((v, u, w))  # eftersom vägarna är dubbla
     except FileNotFoundError:
-        print(f"Filen '{filename}' hittades inte!")
+        print(f"File '{filename}' not found!")
     return edges
 
 
@@ -38,7 +38,7 @@ def bellman_ford(nodes, edges, source):
     # Kolla efter negativa cykler (borde inte finnas i denna uppgift)
     for u, v, w in edges:
         if distance[u] + w < distance[v]:
-            raise ValueError("Grafen innehåller en negativ cykel!")
+            raise ValueError("The graph has a negative cykel!")
 
     return distance, predecessor
 
@@ -61,11 +61,11 @@ if __name__ == "__main__":
     # kör Bellman–Ford från destinationen F
     distance, predecessor = bellman_ford(nodes, edges, "F")
 
-    print("Kortaste avstånd till F:")
+    print("Shortest distance to F:")
     for node in nodes:
         print(f"{node}: {distance[node]}")
 
-    print("\nKortaste vägar till F:")
+    print("\nShortest path F:")
     for node in nodes:
         if node != "F":
             path = get_path(predecessor, node, "F")
