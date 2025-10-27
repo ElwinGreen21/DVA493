@@ -42,7 +42,11 @@ for episode = 1:n_episodes
         done = (abs(next_state(1))>2.4) || (abs(next_state(3))>12*pi/180);
 
         % Reward
-        reward = done * (-100) + (~done)*1;
+        reward = 1 - (abs(next_state(3)) / (12*pi/180));  % higher when more upright
+        if done
+            reward = -100;
+        end
+
 
         % Update Q
         s_next = discretize_state(next_state, nbins, limits);
