@@ -37,39 +37,76 @@ else
     fprintf('❌ Fell after %.2f seconds.\n', t);
 end
 
-% --- Plot (statiska grafer) ---
-t_axis = (0:length(X)-1)*dt;
-figure;
-subplot(2,1,1);
-plot(t_axis, X, 'LineWidth', 1.5);
-ylabel('Cart position (m)');
-title('Cart position over time');
-grid on;
-
-subplot(2,1,2);
-plot(t_axis, Theta * 180/pi, 'LineWidth', 1.5);
-ylabel('Pole angle (deg)');
-xlabel('Time (s)');
-title('Pole angle over time');
-grid on;
-
-% --- Animation (valfri) ---
-figure;
-axis([-3 3 -1 1]);
-hold on;
+% --- Förbättrad animation av pendeln med hjul som vilar på rälsen ---
+figure('Color','w','Name','Inverted Pendulum Visualization');
 cart_width = 0.4;
 cart_height = 0.2;
 pole_length = 0.5;
+wheel_radius = 0.05;
 
+% Förbered figuren
+axis equal
+axis([-3 3 -1 1]);
+hold on;
+xlabel('Cart Position (m)');
+ylabel('Height (m)');
+title('Inverted Pendulum Control Visualization');
+grid on;
+
+% Rita golv (ljusgrön bakgrund)
+railY = -cart_height/2 - wheel_radius; % Rälsen direkt under hjulen
+fill([-3 3 3 -3], [-1 -1 railY-0.02 railY-0.02], [0.9 1 0.9], 'EdgeColor','none');
+
+% Räls (lite ovanför golvet)
+rail = line([-3 3], [railY railY], 'Color', [0.3 0.3 0.3], 'LineWidth', 2);
+
+% Skapa objekt som uppdateras
+cart = rectangle('Position',[X(1)-cart_width/2, -cart_height/2, cart_width, cart_height], ...
+                 'FaceColor',[0.2 0.6 1], 'EdgeColor','k', 'Curvature',0.2);
+
+% Hjulen ska vila på rälsen
+theta_circ = linspace(0, 2*pi, 20);
+wheelL = fill(X(1)-cart_width/3 + wheel_radius*cos(theta_circ), ...
+              railY + wheel_radius*sin(theta_circ), [0 0 0]);
+wheelR = fill(X(1)+cart_width/3 + wheel_radius*cos(theta_circ), ...
+              railY + wheel_radius*sin(theta_circ), [0 0 0]);
+
+% Pendeln
+pole = line([X(1), X(1) + pole_length*sin(Theta(1))], ...
+            [cart_height/2, cart_height/2 + pole_length*cos(Theta(1))], ...
+            'LineWidth',4,'Color',[0.1 0.1 0.1]);
+
+% Tidstext
+timeText = text(-2.8, 0.85, 'Time: 0.00 s', 'FontSize',12, 'FontWeight','bold', 'Color',[0 0 0.6]);
+
+% --- Animation loop ---
 for i = 1:length(X)
-    clf;
-    rectangle('Position',[X(i)-cart_width/2, -cart_height/2, cart_width, cart_height],'FaceColor',[0 0.5 1]);
+    % Uppdatera vagnens position
+    set(cart, 'Position', [X(i)-cart_width/2, -cart_height/2, cart_width, cart_height]);
+    
+    % Uppdatera hjulens position (nu på rälsen)
+    set(wheelL, 'XData', X(i)-cart_width/3 + wheel_radius*cos(theta_circ), ...
+                'YData', railY + wheel_radius*sin(theta_circ));
+    set(wheelR, 'XData', X(i)+cart_width/3 + wheel_radius*cos(theta_circ), ...
+                'YData', railY + wheel_radius*sin(theta_circ));
+    
+    % Uppdatera pendelns topposition
     px = X(i) + pole_length * sin(Theta(i));
     py = cart_height/2 + pole_length * cos(Theta(i));
-    line([X(i), px],[cart_height/2, py],'LineWidth',3,'Color','k');
-    line([-3,3],[-cart_height/2,-cart_height/2],'Color','k');
-    axis([-3 3 -1 1]);
-    title(sprintf('Step %d / %d', i, length(X)));
-    drawnow;
-    pause(0.01);
+    set(pole, 'XData', [X(i) px], 'YData', [cart_height/2 py]);
+    
+    % Uppdatera tidstext
+    set(timeText, 'String', sprintf('Time: %.2f s', i*dt));
+    
+    drawnow limitrate;
+    pause(0.005);
+end
+
+% Slutmeddelande
+if ~done
+    msg = sprintf('✅ Balanced for %.2f s!', length(X)*dt);
+    text(-1,0.9,msg,'FontSize',14,'FontWeight','bold','Color',[0 0.5 0]);
+else
+    msg = sprintf('❌ Fell after %.2f s', length(X)*dt);
+    text(-1,0.9,msg,'FontSize',14,'FontWeight','bold','Color',[0.8 0 0]);
 end
