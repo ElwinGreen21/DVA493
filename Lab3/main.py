@@ -102,8 +102,9 @@ def main():
         print(f"\nK-means with top {n_components} principal components:")
         for i in range(k):
             print(f"  Cluster {i+1}: {cluster_sizes[i]} points")
-        print(f"  Centroid shape: {centroids.shape}")  
-
+            print(f"  Centroid coordinates: {centroids[i]}")
+            print(f"  Centroid shape: {centroids.shape}\n")  
+        
         
         if n_components == 2:
             plt.figure(figsize=(7, 5))

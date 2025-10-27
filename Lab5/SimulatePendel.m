@@ -1,11 +1,11 @@
-function y=simulate(force, x, x_dot, theta, theta_dot)
+function y=SimulatePendel(force, x, x_dot, theta, theta_dot)
 % compute the next states given the force and the current states
 
 GRAVITY=9.8;
 MASSCART=1.0;
 MASSPOLE=0.1;
 TOTAL_MASS=MASSPOLE + MASSCART;
-L01111111111111111111111111ENGTH=0.5;		  
+LENGTH=0.5;		  
 POLEMASS_LENGTH=MASSPOLE * LENGTH;
 STEP=0.02;
 FOURTHIRDS=1.3333333333333;
