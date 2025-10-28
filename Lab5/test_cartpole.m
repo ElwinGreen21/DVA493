@@ -37,7 +37,7 @@ else
     fprintf('❌ Fell after %.2f seconds.\n', t);
 end
 
-% --- Förbättrad animation av pendeln med hjul som vilar på rälsen ---
+% --- Animation av pendeln ---
 figure('Color','w','Name','Inverted Pendulum Visualization');
 cart_width = 0.4;
 cart_height = 0.2;
@@ -53,8 +53,8 @@ ylabel('Height (m)');
 title('Inverted Pendulum Control Visualization');
 grid on;
 
-% Rita golv (ljusgrön bakgrund)
-railY = -cart_height/2 - wheel_radius; % Rälsen direkt under hjulen
+% Rita golv
+railY = -cart_height/2 - wheel_radius; 
 fill([-3 3 3 -3], [-1 -1 railY-0.02 railY-0.02], [0.9 1 0.9], 'EdgeColor','none');
 
 % Räls (lite ovanför golvet)
@@ -84,7 +84,7 @@ for i = 1:length(X)
     % Uppdatera vagnens position
     set(cart, 'Position', [X(i)-cart_width/2, -cart_height/2, cart_width, cart_height]);
     
-    % Uppdatera hjulens position (nu på rälsen)
+    % Uppdatera hjulens position
     set(wheelL, 'XData', X(i)-cart_width/3 + wheel_radius*cos(theta_circ), ...
                 'YData', railY + wheel_radius*sin(theta_circ));
     set(wheelR, 'XData', X(i)+cart_width/3 + wheel_radius*cos(theta_circ), ...
@@ -110,3 +110,20 @@ else
     msg = sprintf('❌ Fell after %.2f s', length(X)*dt);
     text(-1,0.9,msg,'FontSize',14,'FontWeight','bold','Color',[0.8 0 0]);
 end
+
+% --- Plot (statiska grafer) ---
+t_axis = (0:length(X)-1)*dt;
+figure;
+subplot(2,1,1);
+plot(t_axis, X, 'LineWidth', 1.5);
+ylabel('Cart position (m)');
+title('Cart position over time');
+grid on;
+
+subplot(2,1,2);
+plot(t_axis, Theta * 180/pi, 'LineWidth', 1.5);
+ylabel('Pole angle (deg)');
+xlabel('Time (s)');
+title('Pole angle over time');
+grid on;
+
