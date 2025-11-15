@@ -5,10 +5,10 @@
 
 #define NUM_FEATURES 16
 #define NUM_OUTPUTS 2
-#define NUM_HIDDEN1 256
-#define NUM_HIDDEN2 128
-#define NUM_HIDDEN3 64
-#define NUM_HIDDEN4 32
+#define NUM_HIDDEN1 64
+#define NUM_HIDDEN2 32
+#define NUM_HIDDEN3 16
+#define NUM_HIDDEN4 8
 
 typedef struct {
     double **X;
@@ -252,6 +252,12 @@ int main(void) {
     FILE *file = fopen("maintenance.txt", "r");
     if (!file) { printf("Could not open maintenance.txt\n"); return 1; }
 
+    FILE *val_log = fopen("val_loss_log.txt", "w");
+    if (!val_log) {
+        printf("Could not open val_loss_log.txt for writing\n");
+        return 1;
+    }
+
     // räkna rader
     int num_rows = 0; char ch;
     while (!feof(file)) { ch = fgetc(file); if (ch == '\n') num_rows++; }
@@ -323,8 +329,8 @@ int main(void) {
         for (int j = 0; j < NUM_HIDDEN4; j++) W_h4_out[i][j] = rand_uniform() * scale;
     }
 
-    int epochs = 1500;
-    double learning_rate = 0.0025;
+    int epochs = 10000;
+    double learning_rate = 0.003;
     double val_check = 0.0;
     int times_no_improve = 0;
 
@@ -357,25 +363,40 @@ int main(void) {
                 h1, h2, h3, h4, outputs,
                 z_h1, z_h2, z_h3, z_h4, z_out);
 
+            // Denormalize both prediction and ground truth
+            double pred_denorm[NUM_OUTPUTS];
+            double true_denorm[NUM_OUTPUTS];
+            for (int j = 0; j < NUM_OUTPUTS; j++) {
+                pred_denorm[j] = denorm_output(outputs[j], output_min[j], output_max[j]);
+                true_denorm[j] = denorm_output(datasets.val.y[i][j], output_min[j], output_max[j]);
+            }
+
+            // Compute denormalized MSE
             double loss[NUM_OUTPUTS];
-            mse_per_output(datasets.val.y[i], outputs, NUM_OUTPUTS, loss);
+            mse_per_output(true_denorm, pred_denorm, NUM_OUTPUTS, loss);
             val_loss += (loss[0] + loss[1]) / 2.0;
         }
-        val_loss /= datasets.val.size;
+       val_loss /= datasets.val.size;
         // minska learning rate om ingen förbättring på 10 epoker
+
         if( val_check == 0.0 || val_loss < val_check ){
             val_check = val_loss;
             times_no_improve = 0;
         } else {
             times_no_improve++;
             if( times_no_improve >= 10 ){
-                learning_rate *= 0.925;
+                learning_rate *= 0.95;
                 printf("No improvement, reducing learning rate to %f\n", learning_rate);
             }
         }
-            
+        if (e == 9000){
+            learning_rate = 0.0001;
+            printf("Learning rate satt till %f\n", learning_rate);
+        }    
 
-        printf("Epoch %d: Train Loss = %f, Val Loss = %f\n", e + 1, train_loss, val_loss);
+        printf("Epoch %d: Train Loss = %f, Val Loss = %.15e\n", e + 1, train_loss, val_loss);
+        fprintf(val_log, "%d %.15e\n", e + 1, val_loss);
+        fflush(val_log); // säkerställ att datan skrivs direkt till filen
     }
 
     // Test
@@ -400,5 +421,6 @@ int main(void) {
     test_loss[1] /= datasets.test.size;
     printf("Test Loss (MSE) för output  turbine = %.10e\n", test_loss[1]);
     fclose(file);
+    fclose(val_log);
     return 0;
 }
